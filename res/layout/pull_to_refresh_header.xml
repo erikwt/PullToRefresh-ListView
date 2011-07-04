@@ -1,14 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="0px"
-	android:gravity="bottom|center_horizontal"
+	android:gravity="bottom"
 	android:background="@android:color/white">
-  
-    <TextView android:id="@+id/text"
-        android:layout_width="wrap_content"
+
+    <RelativeLayout android:id="@+id/header"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone" />
+        android:gravity="center_vertical"
+        android:padding="10dp">
+
+	    <ImageView android:id="@+id/image"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="30dp"
+	        android:src="@drawable/ic_pulltorefresh_arrow" />
+	        
+	    <ProgressBar android:id="@+id/spinner"
+	        android:indeterminate="true"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="30dp"
+	        android:visibility="gone"/>
+	
+	    <TextView android:id="@+id/text"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textSize="9pt"
+	        android:textColor="@android:color/black"
+	        android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
 </LinearLayout>
