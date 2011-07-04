@@ -1,0 +1,19 @@
+local
+.settings
+local.properties
+bin
+gen
+
+# From https://github.com/github/gitignore/raw/master/Android.gitignore
+# built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated GUI files
+*R.java
