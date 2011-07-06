@@ -30,10 +30,10 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 
 	private int					previousY;
 	private int					scrollState;
-	private LinearLayout		headerContainer;
+	private LinearLayout		headerLayout;
 	private RelativeLayout		header;
-	private RotateAnimation		mFlipAnimation;
-	private RotateAnimation		mReverseFlipAnimation;
+	private RotateAnimation		flipAnimation;
+	private RotateAnimation		reverseFlipAnimation;
 	private ImageView			image;
 	private ProgressBar			spinner;
 	private TextView			text;
@@ -57,30 +57,24 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 	private void init(){
 		setVerticalFadingEdgeEnabled(false);
 
-		headerContainer = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header, null);
-		header = (RelativeLayout) headerContainer.findViewById(R.id.header);
+		headerLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header, null);
+		header = (RelativeLayout) headerLayout.findViewById(R.id.header);
 		text = (TextView) header.findViewById(R.id.text);
 		image = (ImageView) header.findViewById(R.id.image);
 		spinner = (ProgressBar) header.findViewById(R.id.spinner);
 
-		mFlipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
-		mFlipAnimation.setInterpolator(new LinearInterpolator());
-		mFlipAnimation.setDuration(250);
-		mFlipAnimation.setFillAfter(true);
+		flipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+		flipAnimation.setInterpolator(new LinearInterpolator());
+		flipAnimation.setDuration(250);
+		flipAnimation.setFillAfter(true);
 		
-		mReverseFlipAnimation = new RotateAnimation(-180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
-		mReverseFlipAnimation.setInterpolator(new LinearInterpolator());
-		mReverseFlipAnimation.setDuration(250);
-		mReverseFlipAnimation.setFillAfter(true);
+		reverseFlipAnimation = new RotateAnimation(-180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+		reverseFlipAnimation.setInterpolator(new LinearInterpolator());
+		reverseFlipAnimation.setDuration(250);
+		reverseFlipAnimation.setFillAfter(true);
 
-		addHeaderView(headerContainer);
+		addHeaderView(headerLayout);
 		setState(State.PULL_TO_REFRESH);
-	}
-
-	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom){
-		super.onLayout(changed, left, top, right, bottom);
-		if(changed) setHeaderPadding(-headerContainer.getHeight());
 	}
 
 	public void setOnRefreshListener(OnRefreshListener onRefreshListener){
@@ -88,11 +82,11 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 	}
 
 	private void setHeaderPadding(int height){
-		headerContainer.setPadding(
-				headerContainer.getPaddingLeft(),
+		headerLayout.setPadding(
+				headerLayout.getPaddingLeft(),
 				height,
-				headerContainer.getPaddingRight(),
-				headerContainer.getPaddingBottom());
+				headerLayout.getPaddingRight(),
+				headerLayout.getPaddingBottom());
 	}
 
 	@Override
@@ -111,7 +105,7 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 					switch(state){
 						case RELEASE_TO_REFRESH:
 							setState(State.REFRESHING);
-							smoothScrollBy(headerContainer.getHeight() - header.getHeight(), SCROLL_ANIMATION_DURATION);
+							smoothScrollBy(headerLayout.getHeight() - header.getHeight(), SCROLL_ANIMATION_DURATION);
 							break;
 
 						case PULL_TO_REFRESH:
@@ -126,19 +120,19 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 					int y = Math.round(event.getY());
 					int diff = y - previousY;
 					if(diff > 0) diff /= RESISTANCE;
-					setHeaderPadding(headerContainer.getPaddingTop() + diff);
+					setHeaderPadding(headerLayout.getPaddingTop() + diff);
 					previousY = y;
 
-					if(state == State.PULL_TO_REFRESH && headerContainer.getPaddingTop() + header.getHeight() > header.getHeight()){
+					if(state == State.PULL_TO_REFRESH && headerLayout.getPaddingTop() + header.getHeight() > header.getHeight()){
 						setState(State.RELEASE_TO_REFRESH);
 
 						image.clearAnimation();
-						image.startAnimation(mFlipAnimation);
-					}else if(state == State.RELEASE_TO_REFRESH && headerContainer.getPaddingTop() + header.getHeight() < header.getHeight()){
+						image.startAnimation(flipAnimation);
+					}else if(state == State.RELEASE_TO_REFRESH && headerLayout.getPaddingTop() + header.getHeight() < header.getHeight()){
 						setState(State.PULL_TO_REFRESH);
-						
+
 						image.clearAnimation();
-						image.startAnimation(mReverseFlipAnimation);
+						image.startAnimation(reverseFlipAnimation);
 					}
 				}
 
@@ -149,7 +143,11 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 	}
 
 	private void resetHeader(){
-		int amount = state == State.REFRESHING ? header.getHeight() : headerContainer.getHeight();
+		if(headerLayout.getPaddingTop() == -header.getHeight()){
+			return;
+		}
+		
+		final int amount = state == State.REFRESHING ? header.getHeight() : headerLayout.getHeight();
 		smoothScrollBy(amount, SCROLL_ANIMATION_DURATION);
 
 		new AsyncTask<Void, Void, Void>(){
