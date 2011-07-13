@@ -23,7 +23,8 @@ import android.widget.AbsListView.OnScrollListener;
 
 public class PullToRefreshListView extends ListView implements OnScrollListener{
 
-	private static final int	SCROLL_ANIMATION_DURATION	= 700;
+	private static final float	OVERSHOOT_TENSION			= 1.5f;
+	private static final int	SCROLL_ANIMATION_DURATION	= 500;
 	private static final float	RESISTANCE					= 1.7f;
 
 	private enum State{
@@ -32,7 +33,7 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 
 	private OnRefreshListener	onRefreshListener;
 
-	private int					previousY;
+	private float				previousY;
 	private int					scrollState;
 	private int					headerPadding;
 	private LinearLayout		headerLayout;
@@ -44,8 +45,6 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 	private TextView			text;
 	private State				state;
 	
-	private android.view.ViewGroup.LayoutParams listLayoutParams;
-
 	public PullToRefreshListView(Context context){
 		super(context);
 		init();
@@ -90,11 +89,6 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 
 	private void setHeaderPadding(int padding){
 		headerPadding = padding;
-//		headerLayout.setPadding(
-//				headerLayout.getPaddingLeft(),
-//				padding,
-//				headerLayout.getPaddingRight(),
-//				headerLayout.getPaddingBottom());
 		
 		MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) header.getLayoutParams();
 		mlp.setMargins(0, padding, 0, 0);
@@ -130,10 +124,10 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 
 			case MotionEvent.ACTION_MOVE:
 				if(previousY != -1 && getFirstVisiblePosition() == 0){
-					int y = Math.round(event.getY());
-					int diff = y - previousY;
+					float y = event.getY();
+					float diff = y - previousY;
 					if(diff > 0) diff /= RESISTANCE;
-					setHeaderPadding(headerPadding + diff);
+					setHeaderPadding(headerPadding + Math.round(diff));
 					previousY = y;
 
 					if(state == State.PULL_TO_REFRESH && headerPadding > 0){
@@ -154,53 +148,22 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 
 		return super.onTouchEvent(event);
 	}
-	int height;
+
 	private void animateHeader(){
-		if(height == 0) height = getLayoutParams().height;
-		
-//		final int toYValue = state == State.REFRESHING ? -(headerLayout.getHeight() - header.getHeight()) : -headerLayout.getHeight();
-		
-		final int toYValue = -(headerPadding - headerLayout.getHeight());
+		int yTranslate = state == State.REFRESHING ? -(headerLayout.getHeight() - header.getHeight()) : -headerLayout.getHeight();
 		
 		TranslateAnimation ta = new TranslateAnimation(
 				TranslateAnimation.ABSOLUTE, 0, 
 				TranslateAnimation.ABSOLUTE, 0,
 				TranslateAnimation.ABSOLUTE, 0,
-				TranslateAnimation.ABSOLUTE, toYValue);
+				TranslateAnimation.ABSOLUTE, yTranslate);
 		
 		ta.setDuration(SCROLL_ANIMATION_DURATION);
 		ta.setFillEnabled(true);
-		ta.setFillAfter(true);
-        ta.setInterpolator(new OvershootInterpolator());
-		
-        ta.setAnimationListener(new AnimationListener(){
-//			int height;
-        	
-			@Override
-			public void onAnimationStart(Animation animation){
-				android.view.ViewGroup.LayoutParams lp = getLayoutParams();
-//				height = lp.height;
-				int listHeight = getMeasuredHeight();
-				lp.height = listHeight + (headerLayout.getHeight() - header.getHeight());
-				setLayoutParams(lp);
-			}
-			
-			@Override
-			public void onAnimationEnd(Animation animation){
-//				setHeaderPadding(0);
-
-				android.view.ViewGroup.LayoutParams lp = getLayoutParams();
-				lp.height = height;
-				setLayoutParams(lp);
-				
-//				setLayoutParams(listLayoutParams);
-//				
-//				scrollTo(0, 0);
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation){}
-		});
+		ta.setFillAfter(false);
+		ta.setFillBefore(true);
+        ta.setInterpolator(new OvershootInterpolator(OVERSHOOT_TENSION));
+        ta.setAnimationListener(new HeaderAnimationListener());
 		
 		startAnimation(ta);
 	}
@@ -210,10 +173,7 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 			return;
 		}
 		
-//		int amount = state == State.REFRESHING ? header.getHeight() : headerLayout.getHeight();
-//		smoothScrollBy(amount, SCROLL_ANIMATION_DURATION);
-		
-//		animateHeader();
+		animateHeader();
 	}
 
 	public void setState(State state){
@@ -259,11 +219,36 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 	}
 	
 	public void onRefreshComplete(){
-		resetHeader();
 		setState(State.PULL_TO_REFRESH);
+		resetHeader();
 	}
 
 	public interface OnRefreshListener{
 		public void onRefresh();
+	}
+	
+	private class HeaderAnimationListener implements AnimationListener{
+		
+		private int height;
+    	
+		@Override
+		public void onAnimationStart(Animation animation){
+			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
+			height = lp.height;
+			lp.height = getHeight() + headerLayout.getHeight();
+			setLayoutParams(lp);
+		}
+		
+		@Override
+		public void onAnimationEnd(Animation animation){
+			setHeaderPadding(state == State.REFRESHING ? 0 : -header.getHeight());
+			
+			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
+			lp.height = height;
+			setLayoutParams(lp);
+		}
+
+		@Override
+		public void onAnimationRepeat(Animation animation){}
 	}
 }
