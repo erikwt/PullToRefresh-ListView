@@ -12,18 +12,16 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
-import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.AbsListView.OnScrollListener;
 
-public class PullToRefreshListView extends ListView implements OnScrollListener{
+public class PullToRefreshListView extends ListView{
 
-	private static final float	OVERSHOOT_TENSION			= 1.5f;
+	private static final float	OVERSHOOT_TENSION			= 1.3f;
 	private static final int	SCROLL_ANIMATION_DURATION	= 500;
 	private static final float	RESISTANCE					= 1.7f;
 
@@ -33,8 +31,8 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 
 	private OnRefreshListener	onRefreshListener;
 
+	private State				state;
 	private float				previousY;
-	private int					scrollState;
 	private int					headerPadding;
 	private LinearLayout		headerLayout;
 	private RelativeLayout		header;
@@ -43,7 +41,7 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 	private ImageView			image;
 	private ProgressBar			spinner;
 	private TextView			text;
-	private State				state;
+	private boolean				scrollbarEnabled;
 	
 	public PullToRefreshListView(Context context){
 		super(context);
@@ -81,10 +79,21 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 
 		addHeaderView(headerLayout);
 		setState(State.PULL_TO_REFRESH);
+		scrollbarEnabled = isVerticalScrollBarEnabled();
 	}
 
 	public void setOnRefreshListener(OnRefreshListener onRefreshListener){
 		this.onRefreshListener = onRefreshListener;
+	}
+	
+	public void setRefreshing(){
+		setState(State.REFRESHING);
+		setHeaderPadding(header.getHeight());
+	}
+	
+	public void onRefreshComplete(){
+		setState(State.PULL_TO_REFRESH);
+		resetHeader();
 	}
 
 	private void setHeaderPadding(int padding){
@@ -98,11 +107,10 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 	@Override
 	public boolean onTouchEvent(MotionEvent event){
 		if(state == State.REFRESHING) return true;
-		if(scrollState == SCROLL_STATE_FLING) previousY = -1;
 
 		switch(event.getAction()){
 			case MotionEvent.ACTION_DOWN:
-				if(getFirstVisiblePosition() == 0) previousY = Math.round(event.getY());
+				if(getFirstVisiblePosition() == 0) previousY = event.getY();
 				else previousY = -1;
 				break;
 
@@ -176,7 +184,7 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 		animateHeader();
 	}
 
-	public void setState(State state){
+	private void setState(State state){
 		this.state = state;
 		switch(state){
 			case PULL_TO_REFRESH:
@@ -207,22 +215,6 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 		}
 	}
 
-	public void onScrollStateChanged(AbsListView view, int scrollState){
-		this.scrollState = scrollState;
-	}
-
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){}
-
-	public void setRefreshing(){
-		setState(State.REFRESHING);
-		setHeaderPadding(header.getHeight());
-	}
-	
-	public void onRefreshComplete(){
-		setState(State.PULL_TO_REFRESH);
-		resetHeader();
-	}
-
 	public interface OnRefreshListener{
 		public void onRefresh();
 	}
@@ -237,6 +229,10 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 			height = lp.height;
 			lp.height = getHeight() + headerLayout.getHeight();
 			setLayoutParams(lp);
+			
+			if(scrollbarEnabled){
+				setVerticalScrollBarEnabled(false);
+			}
 		}
 		
 		@Override
@@ -246,6 +242,10 @@ public class PullToRefreshListView extends ListView implements OnScrollListener{
 			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
 			lp.height = height;
 			setLayoutParams(lp);
+			
+			if(scrollbarEnabled){
+				setVerticalScrollBarEnabled(true);
+			}
 		}
 
 		@Override
