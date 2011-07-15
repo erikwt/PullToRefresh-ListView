@@ -1,5 +1,6 @@
-package nl.saints;
+package eu.erikw;
 
+import nl.saints.R;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;

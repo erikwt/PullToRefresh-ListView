@@ -1,6 +1,7 @@
-package nl.saints;
+package eu.erikw;
 
-import nl.saints.PullToRefreshListView.OnRefreshListener;
+import eu.erikw.PullToRefreshListView.OnRefreshListener;
+import nl.saints.R;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
