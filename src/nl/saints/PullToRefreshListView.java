@@ -177,11 +177,21 @@ public class PullToRefreshListView extends ListView{
 	}
 
 	private void resetHeader(){
-		if(headerPadding == -header.getHeight()){
+		if(headerPadding == -header.getHeight() || getFirstVisiblePosition() > 0){
 			return;
 		}
 		
-		animateHeader();
+		if(getAnimation() != null && !getAnimation().hasEnded()){
+			postDelayed(new Runnable(){
+				
+				@Override
+				public void run(){
+					animateHeader();
+				}
+			}, SCROLL_ANIMATION_DURATION);
+		}else{
+			animateHeader();
+		}
 	}
 
 	private void setState(State state){
