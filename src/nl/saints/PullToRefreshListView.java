@@ -21,9 +21,10 @@ import android.widget.TextView;
 
 public class PullToRefreshListView extends ListView{
 
-	private static final float	OVERSHOOT_TENSION			= 1.3f;
-	private static final int	SCROLL_ANIMATION_DURATION	= 500;
+	private static final float	OVERSHOOT_TENSION			= 1.4f;
 	private static final float	RESISTANCE					= 1.7f;
+	private static final int	SCROLL_ANIMATION_DURATION	= 700;
+	private static final int	ANIMATION_DELAY				= 100;
 
 	private enum State{
 		PULL_TO_REFRESH, RELEASE_TO_REFRESH, REFRESHING
@@ -42,6 +43,7 @@ public class PullToRefreshListView extends ListView{
 	private ProgressBar			spinner;
 	private TextView			text;
 	private boolean				scrollbarEnabled;
+	private boolean				animateAgain;
 	
 	public PullToRefreshListView(Context context){
 		super(context);
@@ -131,11 +133,11 @@ public class PullToRefreshListView extends ListView{
 				break;
 
 			case MotionEvent.ACTION_MOVE:
-				if(previousY != -1 && getFirstVisiblePosition() == 0){
+				if(previousY != -1){
 					float y = event.getY();
 					float diff = y - previousY;
 					if(diff > 0) diff /= RESISTANCE;
-					setHeaderPadding(headerPadding + Math.round(diff));
+					setHeaderPadding(Math.max(headerPadding + Math.round(diff), -header.getHeight()));
 					previousY = y;
 
 					if(state == State.PULL_TO_REFRESH && headerPadding > 0){
@@ -179,16 +181,10 @@ public class PullToRefreshListView extends ListView{
 	private void resetHeader(){
 		if(headerPadding == -header.getHeight() || getFirstVisiblePosition() > 0){
 			return;
-		}
+		}		
 		
 		if(getAnimation() != null && !getAnimation().hasEnded()){
-			postDelayed(new Runnable(){
-				
-				@Override
-				public void run(){
-					animateHeader();
-				}
-			}, SCROLL_ANIMATION_DURATION);
+			animateAgain = true;
 		}else{
 			animateHeader();
 		}
@@ -232,9 +228,12 @@ public class PullToRefreshListView extends ListView{
 	private class HeaderAnimationListener implements AnimationListener{
 		
 		private int height;
+		private State stateAtAnimationStart;
     	
 		@Override
 		public void onAnimationStart(Animation animation){
+			stateAtAnimationStart = state;
+			
 			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
 			height = lp.height;
 			lp.height = getHeight() + headerLayout.getHeight();
@@ -247,7 +246,7 @@ public class PullToRefreshListView extends ListView{
 		
 		@Override
 		public void onAnimationEnd(Animation animation){
-			setHeaderPadding(state == State.REFRESHING ? 0 : -header.getHeight());
+			setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -header.getHeight());
 			
 			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
 			lp.height = height;
@@ -255,6 +254,18 @@ public class PullToRefreshListView extends ListView{
 			
 			if(scrollbarEnabled){
 				setVerticalScrollBarEnabled(true);
+			}
+			
+			if(animateAgain){
+				animateAgain = false;
+				
+				postDelayed(new Runnable(){
+					
+					@Override
+					public void run(){
+						animateHeader();
+					}
+				}, ANIMATION_DELAY);
 			}
 		}
 
