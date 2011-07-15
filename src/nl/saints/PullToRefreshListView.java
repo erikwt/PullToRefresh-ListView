@@ -19,15 +19,39 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+/**
+ * A generic ListView implementation that has 'Pull to refresh' functionality.
+ * 
+ * This ListView can be used in place of the normal Android android.widget.ListView class.
+ * Users of this class should implement OnRefreshListener and call setOnRefreshListener(..)
+ * to get notified on refresh events. The using class should call onRefreshComplete() when 
+ * refreshing is finished.
+ * 
+ * The using class can call setRefreshing() to set the state explicitly to refreshing. This
+ * is useful when you want to show the spinner and 'Refreshing' text when the refresh was
+ * not triggered by 'pull to refresh', for example on start.
+ * 
+ * @author Erik Wallentinsen <mail@erikw.eu>
+ *
+ */
 public class PullToRefreshListView extends ListView{
 
-	private static final float	OVERSHOOT_TENSION			= 1.4f;
-	private static final float	RESISTANCE					= 1.7f;
-	private static final int	SCROLL_ANIMATION_DURATION	= 700;
-	private static final int	ANIMATION_DELAY				= 100;
+	private static final float	PULL_RESISTANCE					= 1.7f;
+	private static final int	BOUNCE_ANIMATION_DURATION		= 700;
+	private static final int	BOUNCE_ANIMATION_DELAY			= 100;
+	private static final float	BOUNCE_OVERSHOOT_TENSION		= 1.4f;
+	private static final int	ROTATE_ARROW_ANIMATION_DURATION	= 250;
 
 	private enum State{
 		PULL_TO_REFRESH, RELEASE_TO_REFRESH, REFRESHING
+	}
+
+	/**
+	 * Interface to implement when you want to get notified of 'pull to refresh' events. 
+	 * Call setOnRefreshListener(..) to activate an OnRefreshListener.
+	 */
+	public interface OnRefreshListener{
+		public void onRefresh();
 	}
 
 	private OnRefreshListener	onRefreshListener;
@@ -35,16 +59,17 @@ public class PullToRefreshListView extends ListView{
 	private State				state;
 	private float				previousY;
 	private int					headerPadding;
-	private LinearLayout		headerLayout;
+	private LinearLayout		headerContainer;
 	private RelativeLayout		header;
 	private RotateAnimation		flipAnimation;
 	private RotateAnimation		reverseFlipAnimation;
+	private TranslateAnimation	bounceAnimation;
 	private ImageView			image;
 	private ProgressBar			spinner;
 	private TextView			text;
 	private boolean				scrollbarEnabled;
-	private boolean				animateAgain;
-	
+	private boolean				bounceBackHeader;
+
 	public PullToRefreshListView(Context context){
 		super(context);
 		init();
@@ -63,36 +88,48 @@ public class PullToRefreshListView extends ListView{
 	private void init(){
 		setVerticalFadingEdgeEnabled(false);
 
-		headerLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header, null);
-		header = (RelativeLayout) headerLayout.findViewById(R.id.header);
+		headerContainer = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header, null);
+		header = (RelativeLayout) headerContainer.findViewById(R.id.header);
 		text = (TextView) header.findViewById(R.id.text);
 		image = (ImageView) header.findViewById(R.id.image);
 		spinner = (ProgressBar) header.findViewById(R.id.spinner);
 
 		flipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		flipAnimation.setInterpolator(new LinearInterpolator());
-		flipAnimation.setDuration(250);
+		flipAnimation.setDuration(ROTATE_ARROW_ANIMATION_DURATION);
 		flipAnimation.setFillAfter(true);
-		
+
 		reverseFlipAnimation = new RotateAnimation(-180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		reverseFlipAnimation.setInterpolator(new LinearInterpolator());
-		reverseFlipAnimation.setDuration(250);
+		reverseFlipAnimation.setDuration(ROTATE_ARROW_ANIMATION_DURATION);
 		reverseFlipAnimation.setFillAfter(true);
 
-		addHeaderView(headerLayout);
+		addHeaderView(headerContainer);
 		setState(State.PULL_TO_REFRESH);
 		scrollbarEnabled = isVerticalScrollBarEnabled();
 	}
 
+	/**
+	 * Activate an OnRefreshListener to get notified on 'pull to refresh' events.
+	 * @param onRefreshListener The OnRefreshListener to get notified
+	 */
 	public void setOnRefreshListener(OnRefreshListener onRefreshListener){
 		this.onRefreshListener = onRefreshListener;
 	}
-	
+
+	/**
+	 * Explicitly set the state to refreshing. This
+	 * is useful when you want to show the spinner and 'Refreshing' text when the refresh was
+	 * not triggered by 'pull to refresh', for example on start.
+	 */
 	public void setRefreshing(){
 		setState(State.REFRESHING);
 		setHeaderPadding(header.getHeight());
 	}
-	
+
+	/**
+	 * Set the state back to 'pull to refresh'. Call this method when refreshing the data is finished.
+	 */
 	public void onRefreshComplete(){
 		setState(State.PULL_TO_REFRESH);
 		resetHeader();
@@ -100,7 +137,7 @@ public class PullToRefreshListView extends ListView{
 
 	private void setHeaderPadding(int padding){
 		headerPadding = padding;
-		
+
 		MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) header.getLayoutParams();
 		mlp.setMargins(0, padding, 0, 0);
 		header.setLayoutParams(mlp);
@@ -121,8 +158,8 @@ public class PullToRefreshListView extends ListView{
 					switch(state){
 						case RELEASE_TO_REFRESH:
 							setState(State.REFRESHING);
-							animateHeader();
-							
+							bounceBackHeader();
+
 							break;
 
 						case PULL_TO_REFRESH:
@@ -136,9 +173,10 @@ public class PullToRefreshListView extends ListView{
 				if(previousY != -1){
 					float y = event.getY();
 					float diff = y - previousY;
-					if(diff > 0) diff /= RESISTANCE;
-					setHeaderPadding(Math.max(headerPadding + Math.round(diff), -header.getHeight()));
+					if(diff > 0) diff /= PULL_RESISTANCE;
 					previousY = y;
+
+					setHeaderPadding(Math.max(headerPadding + Math.round(diff), -header.getHeight()));
 
 					if(state == State.PULL_TO_REFRESH && headerPadding > 0){
 						setState(State.RELEASE_TO_REFRESH);
@@ -159,34 +197,34 @@ public class PullToRefreshListView extends ListView{
 		return super.onTouchEvent(event);
 	}
 
-	private void animateHeader(){
-		int yTranslate = state == State.REFRESHING ? -(headerLayout.getHeight() - header.getHeight()) : -headerLayout.getHeight();
-		
-		TranslateAnimation ta = new TranslateAnimation(
-				TranslateAnimation.ABSOLUTE, 0, 
+	private void bounceBackHeader(){
+		int yTranslate = state == State.REFRESHING ? -(headerContainer.getHeight() - header.getHeight()) : -headerContainer.getHeight();
+
+		bounceAnimation = new TranslateAnimation(
+				TranslateAnimation.ABSOLUTE, 0,
 				TranslateAnimation.ABSOLUTE, 0,
 				TranslateAnimation.ABSOLUTE, 0,
 				TranslateAnimation.ABSOLUTE, yTranslate);
-		
-		ta.setDuration(SCROLL_ANIMATION_DURATION);
-		ta.setFillEnabled(true);
-		ta.setFillAfter(false);
-		ta.setFillBefore(true);
-        ta.setInterpolator(new OvershootInterpolator(OVERSHOOT_TENSION));
-        ta.setAnimationListener(new HeaderAnimationListener());
-		
-		startAnimation(ta);
+
+		bounceAnimation.setDuration(BOUNCE_ANIMATION_DURATION);
+		bounceAnimation.setFillEnabled(true);
+		bounceAnimation.setFillAfter(false);
+		bounceAnimation.setFillBefore(true);
+		bounceAnimation.setInterpolator(new OvershootInterpolator(BOUNCE_OVERSHOOT_TENSION));
+		bounceAnimation.setAnimationListener(new HeaderAnimationListener());
+
+		startAnimation(bounceAnimation);
 	}
 
 	private void resetHeader(){
 		if(headerPadding == -header.getHeight() || getFirstVisiblePosition() > 0){
 			return;
-		}		
-		
+		}
+
 		if(getAnimation() != null && !getAnimation().hasEnded()){
-			animateAgain = true;
+			bounceBackHeader = true;
 		}else{
-			animateHeader();
+			bounceBackHeader();
 		}
 	}
 
@@ -221,51 +259,47 @@ public class PullToRefreshListView extends ListView{
 		}
 	}
 
-	public interface OnRefreshListener{
-		public void onRefresh();
-	}
-	
 	private class HeaderAnimationListener implements AnimationListener{
-		
-		private int height;
-		private State stateAtAnimationStart;
-    	
+
+		private int		height;
+		private State	stateAtAnimationStart;
+
 		@Override
 		public void onAnimationStart(Animation animation){
 			stateAtAnimationStart = state;
-			
+
 			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
 			height = lp.height;
-			lp.height = getHeight() + headerLayout.getHeight();
+			lp.height = getHeight() + headerContainer.getHeight();
 			setLayoutParams(lp);
-			
+
 			if(scrollbarEnabled){
 				setVerticalScrollBarEnabled(false);
 			}
 		}
-		
+
 		@Override
 		public void onAnimationEnd(Animation animation){
 			setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -header.getHeight());
-			
+
 			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
 			lp.height = height;
 			setLayoutParams(lp);
-			
+
 			if(scrollbarEnabled){
 				setVerticalScrollBarEnabled(true);
 			}
-			
-			if(animateAgain){
-				animateAgain = false;
-				
+
+			if(bounceBackHeader){
+				bounceBackHeader = false;
+
 				postDelayed(new Runnable(){
-					
+
 					@Override
 					public void run(){
-						animateHeader();
+						bounceBackHeader();
 					}
-				}, ANIMATION_DELAY);
+				}, BOUNCE_ANIMATION_DELAY);
 			}
 		}
 
