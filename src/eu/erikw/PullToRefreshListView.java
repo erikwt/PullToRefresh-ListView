@@ -2,11 +2,14 @@ package eu.erikw;
 
 import nl.saints.R;
 import android.content.Context;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -23,17 +26,22 @@ import android.widget.TextView;
 /**
  * A generic ListView implementation that has 'Pull to refresh' functionality.
  * 
- * This ListView can be used in place of the normal Android android.widget.ListView class.
- * Users of this class should implement OnRefreshListener and call setOnRefreshListener(..)
- * to get notified on refresh events. The using class should call onRefreshComplete() when 
+ * This ListView can be used in place of the normal Android
+ * android.widget.ListView class.
+ * Users of this class should implement OnRefreshListener and call
+ * setOnRefreshListener(..)
+ * to get notified on refresh events. The using class should call
+ * onRefreshComplete() when
  * refreshing is finished.
  * 
- * The using class can call setRefreshing() to set the state explicitly to refreshing. This
- * is useful when you want to show the spinner and 'Refreshing' text when the refresh was
+ * The using class can call setRefreshing() to set the state explicitly to
+ * refreshing. This
+ * is useful when you want to show the spinner and 'Refreshing' text when the
+ * refresh was
  * not triggered by 'pull to refresh', for example on start.
  * 
  * @author Erik Wallentinsen <mail@erikw.eu>
- *
+ * 
  */
 public class PullToRefreshListView extends ListView{
 
@@ -48,10 +56,12 @@ public class PullToRefreshListView extends ListView{
 	}
 
 	/**
-	 * Interface to implement when you want to get notified of 'pull to refresh' events. 
+	 * Interface to implement when you want to get notified of 'pull to refresh'
+	 * events.
 	 * Call setOnRefreshListener(..) to activate an OnRefreshListener.
 	 */
 	public interface OnRefreshListener{
+
 		public void onRefresh();
 	}
 
@@ -108,28 +118,54 @@ public class PullToRefreshListView extends ListView{
 		addHeaderView(headerContainer);
 		setState(State.PULL_TO_REFRESH);
 		scrollbarEnabled = isVerticalScrollBarEnabled();
+		
+		ViewTreeObserver vto = header.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int initialHeaderHeight = header.getHeight();
+                if(initialHeaderHeight > 0 && state != State.REFRESHING){
+                	setHeaderPadding(-initialHeaderHeight);
+                }
+                
+                getViewTreeObserver().removeGlobalOnLayoutListener(this);
+            }
+        });
+
 	}
 
 	/**
-	 * Activate an OnRefreshListener to get notified on 'pull to refresh' events.
-	 * @param onRefreshListener The OnRefreshListener to get notified
+	 * Activate an OnRefreshListener to get notified on 'pull to refresh'
+	 * events.
+	 * 
+	 * @param onRefreshListener
+	 *            The OnRefreshListener to get notified
 	 */
 	public void setOnRefreshListener(OnRefreshListener onRefreshListener){
 		this.onRefreshListener = onRefreshListener;
 	}
 
 	/**
+	 * @return If the list is in 'Refreshing' state
+	 */
+	public boolean isRefreshing(){
+		return state == State.REFRESHING;
+	}
+
+	/**
 	 * Explicitly set the state to refreshing. This
-	 * is useful when you want to show the spinner and 'Refreshing' text when the refresh was
+	 * is useful when you want to show the spinner and 'Refreshing' text when
+	 * the refresh was
 	 * not triggered by 'pull to refresh', for example on start.
 	 */
 	public void setRefreshing(){
 		setState(State.REFRESHING);
-		setHeaderPadding(header.getHeight());
+		setHeaderPadding(0);
 	}
 
 	/**
-	 * Set the state back to 'pull to refresh'. Call this method when refreshing the data is finished.
+	 * Set the state back to 'pull to refresh'. Call this method when refreshing
+	 * the data is finished.
 	 */
 	public void onRefreshComplete(){
 		setState(State.PULL_TO_REFRESH);
