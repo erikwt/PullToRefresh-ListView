@@ -2,7 +2,6 @@ package eu.erikw;
 
 import nl.saints.R;
 import android.content.Context;
-import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -159,7 +158,8 @@ public class PullToRefreshListView extends ListView{
 	 * not triggered by 'pull to refresh', for example on start.
 	 */
 	public void setRefreshing(){
-		setState(State.REFRESHING);
+		state = State.REFRESHING;
+		setUiRefreshing();
 		setHeaderPadding(0);
 	}
 
@@ -264,6 +264,13 @@ public class PullToRefreshListView extends ListView{
 			bounceBackHeader();
 		}
 	}
+	
+	private void setUiRefreshing(){
+		spinner.setVisibility(View.VISIBLE);
+		image.clearAnimation();
+		image.setVisibility(View.INVISIBLE);
+		text.setText(R.string.ptr_refreshing);
+	}
 
 	private void setState(State state){
 		this.state = state;
@@ -281,10 +288,7 @@ public class PullToRefreshListView extends ListView{
 				break;
 
 			case REFRESHING:
-				spinner.setVisibility(View.VISIBLE);
-				image.clearAnimation();
-				image.setVisibility(View.INVISIBLE);
-				text.setText(R.string.ptr_refreshing);
+				setUiRefreshing();
 
 				if(onRefreshListener == null){
 					setState(State.PULL_TO_REFRESH);
