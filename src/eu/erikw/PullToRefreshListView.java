@@ -23,24 +23,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
- * A generic ListView implementation that has 'Pull to refresh' functionality.
+ * A generic Android ListView implementation that has 'Pull to Refresh' functionality.
  * 
- * This ListView can be used in place of the normal Android
- * android.widget.ListView class.
- * Users of this class should implement OnRefreshListener and call
- * setOnRefreshListener(..)
- * to get notified on refresh events. The using class should call
- * onRefreshComplete() when
+ * This ListView can be used in place of the normal Android android.widget.ListView class.
+ * 
+ * Users of this class should implement OnRefreshListener and call setOnRefreshListener(..)
+ * to get notified on refresh events. The using class should call onRefreshComplete() when
  * refreshing is finished.
  * 
- * The using class can call setRefreshing() to set the state explicitly to
- * refreshing. This
+ * The using class can call setRefreshing() to set the state explicitly to refreshing. This 
  * is useful when you want to show the spinner and 'Refreshing' text when the
- * refresh was
- * not triggered by 'pull to refresh', for example on start.
+ * refresh was not triggered by 'Pull to Refresh', for example on start.
  * 
  * @author Erik Wallentinsen <mail@erikw.eu>
- * 
+ * @version 1.0.0
  */
 public class PullToRefreshListView extends ListView{
 
@@ -120,7 +116,8 @@ public class PullToRefreshListView extends ListView{
 		
 		ViewTreeObserver vto = header.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-            @Override
+            
+        	@Override
             public void onGlobalLayout() {
                 int initialHeaderHeight = header.getHeight();
                 if(initialHeaderHeight > 0 && state != State.REFRESHING){
@@ -159,6 +156,7 @@ public class PullToRefreshListView extends ListView{
 	 */
 	public void setRefreshing(){
 		state = State.REFRESHING;
+		scrollTo(0, 0);
 		setUiRefreshing();
 		setHeaderPadding(0);
 	}
