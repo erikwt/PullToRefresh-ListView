@@ -19,11 +19,11 @@
             android:paddingRight="25dp" />
 	        
 	    <ProgressBar android:id="@+id/spinner"
+            style="@android:style/Widget.ProgressBar.Small" 
 	        android:indeterminate="true"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            style="@android:style/Widget.ProgressBar.Small" 
             android:paddingLeft="25dp" 
             android:paddingRight="25dp" />
 	
@@ -31,7 +31,8 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-	        android:textSize="9pt"
+	        android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold"
 	        android:textColor="@android:color/black"
 	        android:layout_centerHorizontal="true" />
 
