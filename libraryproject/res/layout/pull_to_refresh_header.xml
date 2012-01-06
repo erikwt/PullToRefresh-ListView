@@ -1,40 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="0px"
-	android:gravity="bottom">
-
-    <RelativeLayout android:id="@+id/header"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp">
-
-	    <ImageView android:id="@+id/image"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_centerVertical="true"
-	        android:src="@drawable/ic_pulltorefresh_arrow"
-            android:paddingLeft="25dp" 
-            android:paddingRight="25dp" />
-	        
-	    <ProgressBar android:id="@+id/spinner"
-            style="@android:style/Widget.ProgressBar.Small" 
-	        android:indeterminate="true"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:paddingLeft="25dp" 
-            android:paddingRight="25dp" />
-	
-	    <TextView android:id="@+id/text"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-	        android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold"
-	        android:textColor="@android:color/black"
-	        android:layout_centerHorizontal="true" />
-
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" style="@style/ptr_headerContainer">
+    <RelativeLayout android:id="@+id/header" style="@style/ptr_header">
+	    <ImageView android:id="@+id/image" style="@style/ptr_arrow" />
+	    <ProgressBar android:id="@+id/spinner" style="@style/ptr_spinner" />
+	    <TextView android:id="@+id/text" style="@style/ptr_text" />
     </RelativeLayout>
 </LinearLayout>
