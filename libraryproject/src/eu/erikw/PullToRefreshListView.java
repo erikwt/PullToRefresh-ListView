@@ -183,7 +183,7 @@ public class PullToRefreshListView extends ListView{
 	 * the data is finished.
 	 */
 	public void onRefreshComplete(){
-		setState(State.PULL_TO_REFRESH);
+		state = State.PULL_TO_REFRESH;
 		resetHeader();
 	}
 
@@ -275,6 +275,7 @@ public class PullToRefreshListView extends ListView{
 
 	private void resetHeader(){
 		if(headerPadding == -header.getHeight() || getFirstVisiblePosition() > 0){
+			setState(State.PULL_TO_REFRESH);
 			return;
 		}
 
@@ -374,6 +375,8 @@ public class PullToRefreshListView extends ListView{
 						bounceBackHeader();
 					}
 				}, BOUNCE_ANIMATION_DELAY);
+			}else if(stateAtAnimationStart != State.REFRESHING){
+				setState(State.PULL_TO_REFRESH);
 			}
 		}
 
