@@ -4,6 +4,7 @@
 
 ## Project
 
+``` java
 /**
  * A generic Android ListView implementation that has 'Pull to Refresh' functionality.
  * 
@@ -19,6 +20,7 @@
  * 
  * @author Erik Wallentinsen
  */
+```
 
 ## Info
 
@@ -50,8 +52,9 @@ Check out the example project in this repository for an implementation example.
 
 ``` java
 // Set a listener to be invoked when the list should be refreshed.
-PullToRefreshListView pullToRefreshView = (PullToRefreshListView) findViewById(R.id.pull_to_refresh_listview);
-pullToRefreshView.setOnRefreshListener(new OnRefreshListener() {
+PullToRefreshListView listView = (PullToRefreshListView) findViewById(R.id.pull_to_refresh_listview);
+listView.setOnRefreshListener(new OnRefreshListener() {
+    
     @Override
     public void onRefresh() {
         // Your code to refresh the list contents
@@ -72,7 +75,6 @@ pullToRefreshView.setOnRefreshListener(new OnRefreshListener() {
 ## Other projects
 This project might not be the best library for you to use in your project, depending on your likes and needs. Consider
 using these great 'Pull to Refresh' libraries;
-
 * chrisbanes: https://github.com/chrisbanes/Android-PullToRefresh
 * johannilsson: https://github.com/johannilsson/android-pulltorefresh
 
@@ -84,4 +86,6 @@ graphic at the top of this readme: https://github.com/johannilsson/android-pullt
 ## License
 
 Copyright (c) 2012 - Erik Wallentinsen
+
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+
