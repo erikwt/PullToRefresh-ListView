@@ -228,7 +228,12 @@ public class PullToRefreshListView extends ListView{
 					if(diff > 0) diff /= PULL_RESISTANCE;
 					previousY = y;
 
-					setHeaderPadding(Math.max(headerPadding + Math.round(diff), -header.getHeight()));
+					int newHeaderPadding = Math.max(headerPadding + Math.round(diff), -header.getHeight()); 
+					if(state == State.REFRESHING && newHeaderPadding > 0){
+						newHeaderPadding = 0;
+					}
+					
+					setHeaderPadding(newHeaderPadding);
 
 					if(state == State.PULL_TO_REFRESH && headerPadding > 0){
 						setState(State.RELEASE_TO_REFRESH);
