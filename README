@@ -1,0 +1,29 @@
+**
+**  Android Pull to Refresh ListView
+**
+
+Credits to johannilsson for the original PullToRefresh project that I used as a base; 
+https://github.com/johannilsson/android-pulltorefresh
+
+/**
+ * A generic Android ListView implementation that has 'Pull to Refresh' functionality.
+ * 
+ * This ListView can be used in place of the normal Android android.widget.ListView class.
+ * 
+ * Users of this class should implement OnRefreshListener and call setOnRefreshListener(..)
+ * to get notified on refresh events. The using class should call onRefreshComplete() when
+ * refreshing is finished.
+ * 
+ * The using class can call setRefreshing() to set the state explicitly to refreshing. This 
+ * is useful when you want to show the spinner and 'Refreshing' text when the
+ * refresh was not triggered by 'Pull to Refresh', for example on start.
+ * 
+ * @author Erik Wallentinsen
+ */
+ 
+Check out the example project for an implementation example.
+ 
+Feel free to ask questions, report bugs and request features at dev at erikw dot eu 
+or on the PullToRefresh-ListView github issue page:
+https://github.com/erikwt/PullToRefresh-ListView/issues
+
