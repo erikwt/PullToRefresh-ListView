@@ -34,7 +34,7 @@ import android.widget.TextView;
  * is useful when you want to show the spinner and 'Refreshing' text when the
  * refresh was not triggered by 'Pull to Refresh', for example on start.
  * 
- * @author Erik Wallentinsen <dev@erikw.eu>
+ * @author Erik Wallentinsen <dev+ptr@erikw.eu>
  * @version 1.0.0
  */
 public class PullToRefreshListView extends ListView{
@@ -74,6 +74,7 @@ public class PullToRefreshListView extends ListView{
 	private TextView			text;
 	private boolean				scrollbarEnabled;
 	private boolean				bounceBackHeader;
+	private boolean				pinOnRefreshing;
 
 	public PullToRefreshListView(Context context){
 		super(context);
@@ -147,6 +148,16 @@ public class PullToRefreshListView extends ListView{
 	}
 
 	/**
+	 * Default is false. When pinOnRefreshing is set to true, the list
+	 * cannot scroll when in 'refreshing' mode. It's 'pinned' on refreshing.
+	 * 
+	 * @param pinOnRefreshing
+	 */
+	public void setPinOnRefreshing(boolean pinOnRefreshing){
+		this.pinOnRefreshing = pinOnRefreshing;
+	}
+	
+	/**
 	 * Explicitly set the state to refreshing. This
 	 * is useful when you want to show the spinner and 'Refreshing' text when
 	 * the refresh was not triggered by 'pull to refresh', for example on start.
@@ -177,7 +188,7 @@ public class PullToRefreshListView extends ListView{
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event){
-		if(state == State.REFRESHING) return true;
+		if(pinOnRefreshing && state == State.REFRESHING) return true;
 
 		switch(event.getAction()){
 			case MotionEvent.ACTION_DOWN:
