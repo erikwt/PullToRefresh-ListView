@@ -67,12 +67,12 @@ listView.setOnRefreshListener(new OnRefreshListener() {
         
         // ...
         
-        // Make sure you call pullToRefreshView.onRefreshComplete()
+        // Make sure you call listView.onRefreshComplete()
         // when the loading is done. This can be done from here or any
         // other place, like on a broadcast receive from your loading
         // service or the onPostExecute of your AsyncTask.
         
-        pullToRefreshListView.onRefreshComplete();
+        listView.onRefreshComplete();
     }
 });
 
