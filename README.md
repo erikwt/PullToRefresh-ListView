@@ -22,6 +22,12 @@
  */
 ```
 
+## Features
+* Drop-in replacement for the android.widget.ListView widget
+* Nice graphics (thanks to johannilsson - see credits)
+* Animations; bouncing animation and rotation animation
+* Easy to integrate in your Android project (see usage)
+
 ## Info
 
 Feel free to ask questions, report bugs and request features at dev at erikw dot eu 
@@ -75,6 +81,7 @@ listView.setOnRefreshListener(new OnRefreshListener() {
 ## Other projects
 This project might not be the best library for you to use in your project, depending on your likes and needs. Consider
 using these great 'Pull to Refresh' libraries;
+
 * chrisbanes: https://github.com/chrisbanes/Android-PullToRefresh
 * johannilsson: https://github.com/johannilsson/android-pulltorefresh
 
