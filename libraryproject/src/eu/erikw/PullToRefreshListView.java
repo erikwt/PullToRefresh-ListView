@@ -9,11 +9,12 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
-import android.view.animation.Animation.AnimationListener;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -34,6 +35,9 @@ import android.widget.TextView;
  * is useful when you want to show the spinner and 'Refreshing' text when the
  * refresh was not triggered by 'Pull to Refresh', for example on start.
  * 
+ * For more information, visit the project page:
+ * https://github.com/erikwt/PullToRefresh-ListView
+ * 
  * @author Erik Wallentinsen <dev+ptr@erikw.eu>
  * @version 1.0.0
  */
@@ -45,8 +49,10 @@ public class PullToRefreshListView extends ListView{
 	private static final float	BOUNCE_OVERSHOOT_TENSION		= 1.4f;
 	private static final int	ROTATE_ARROW_ANIMATION_DURATION	= 250;
 
-	private enum State{
-		PULL_TO_REFRESH, RELEASE_TO_REFRESH, REFRESHING
+	private static enum State{
+		PULL_TO_REFRESH,
+		RELEASE_TO_REFRESH,
+		REFRESHING
 	}
 
 	/**
@@ -55,15 +61,23 @@ public class PullToRefreshListView extends ListView{
 	 * Call setOnRefreshListener(..) to activate an OnRefreshListener.
 	 */
 	public interface OnRefreshListener{
-
+		
+		/**
+		 * Method to be called when a refresh is requested
+		 */
 		public void onRefresh();
 	}
 
-	private OnRefreshListener	onRefreshListener;
+	private static int 			measuredHeaderHeight;
 
-	private State				state;
 	private float				previousY;
 	private int					headerPadding;
+	private boolean				scrollbarEnabled;
+	private boolean				bounceBackHeader;
+	private boolean				pinOnRefreshing;
+	private boolean 			hasResetHeader;
+
+	private State				state;
 	private LinearLayout		headerContainer;
 	private RelativeLayout		header;
 	private RotateAnimation		flipAnimation;
@@ -72,10 +86,10 @@ public class PullToRefreshListView extends ListView{
 	private ImageView			image;
 	private ProgressBar			spinner;
 	private TextView			text;
-	private boolean				scrollbarEnabled;
-	private boolean				bounceBackHeader;
-	private boolean				pinOnRefreshing;
+	private OnItemClickListener onItemClickListener;
+	private OnRefreshListener	onRefreshListener;
 
+	
 	public PullToRefreshListView(Context context){
 		super(context);
 		init();
@@ -90,7 +104,12 @@ public class PullToRefreshListView extends ListView{
 		super(context, attrs, defStyle);
 		init();
 	}
-
+	
+	@Override
+	public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+		this.onItemClickListener = onItemClickListener;
+	}
+	
 	private void init(){
 		setVerticalFadingEdgeEnabled(false);
 
@@ -115,19 +134,9 @@ public class PullToRefreshListView extends ListView{
 		scrollbarEnabled = isVerticalScrollBarEnabled();
 		
 		ViewTreeObserver vto = header.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-            
-        	@Override
-            public void onGlobalLayout() {
-                int initialHeaderHeight = header.getHeight();
-                if(initialHeaderHeight > 0 && state != State.REFRESHING){
-                	setHeaderPadding(-initialHeaderHeight);
-                }
-                
-                getViewTreeObserver().removeGlobalOnLayoutListener(this);
-            }
-        });
+        vto.addOnGlobalLayoutListener(new PTROnGlobalLayoutListener());
 
+        super.setOnItemClickListener(new PTROnItemClickListener());
 	}
 
 	/**
@@ -305,6 +314,19 @@ public class PullToRefreshListView extends ListView{
 				break;
 		}
 	}
+	
+	@Override
+	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+		super.onScrollChanged(l, t, oldl, oldt);
+		
+		if(!hasResetHeader){
+            if(measuredHeaderHeight > 0 && state != State.REFRESHING){
+            	setHeaderPadding(-measuredHeaderHeight);
+            }
+            
+			hasResetHeader = true;
+		}
+	}
 
 	private class HeaderAnimationListener implements AnimationListener{
 
@@ -352,5 +374,31 @@ public class PullToRefreshListView extends ListView{
 
 		@Override
 		public void onAnimationRepeat(Animation animation){}
+	}
+	
+	private class PTROnGlobalLayoutListener implements OnGlobalLayoutListener{
+
+		@Override
+        public void onGlobalLayout() {
+            int initialHeaderHeight = header.getHeight();
+            
+            if(initialHeaderHeight > 0){
+            	measuredHeaderHeight = initialHeaderHeight;
+            }
+            
+            getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        }
+    }
+	
+	private class PTROnItemClickListener implements OnItemClickListener{
+
+		@Override
+		public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+			hasResetHeader = false;
+			
+			if(onItemClickListener != null){
+				onItemClickListener.onItemClick(adapterView, view, position, id);
+			}
+		}
 	}
 }
