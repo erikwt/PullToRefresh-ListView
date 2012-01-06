@@ -1,6 +1,5 @@
 package eu.erikw;
 
-import nl.saints.R;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -35,7 +34,7 @@ import android.widget.TextView;
  * is useful when you want to show the spinner and 'Refreshing' text when the
  * refresh was not triggered by 'Pull to Refresh', for example on start.
  * 
- * @author Erik Wallentinsen <mail@erikw.eu>
+ * @author Erik Wallentinsen <dev@erikw.eu>
  * @version 1.0.0
  */
 public class PullToRefreshListView extends ListView{
@@ -134,8 +133,7 @@ public class PullToRefreshListView extends ListView{
 	 * Activate an OnRefreshListener to get notified on 'pull to refresh'
 	 * events.
 	 * 
-	 * @param onRefreshListener
-	 *            The OnRefreshListener to get notified
+	 * @param onRefreshListener The OnRefreshListener to get notified
 	 */
 	public void setOnRefreshListener(OnRefreshListener onRefreshListener){
 		this.onRefreshListener = onRefreshListener;
@@ -151,8 +149,7 @@ public class PullToRefreshListView extends ListView{
 	/**
 	 * Explicitly set the state to refreshing. This
 	 * is useful when you want to show the spinner and 'Refreshing' text when
-	 * the refresh was
-	 * not triggered by 'pull to refresh', for example on start.
+	 * the refresh was not triggered by 'pull to refresh', for example on start.
 	 */
 	public void setRefreshing(){
 		state = State.REFRESHING;
