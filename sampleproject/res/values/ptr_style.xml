@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- 
+        You can override the default style of all the items in the PullToRefresh library.
+        
+        These styles are:
+        *   ptr_headerContainer
+        *   ptr_header
+        *   ptr_arrow
+        *   ptr_spinner
+        *   ptr_text
+        
+        More info on changing the look of the PullToRefresh library can be found on the
+        project page: https://github.com/erikwt/PullToRefresh-ListView
+     -->
+     
+     <!-- Examples below, remove comment to see effect -->
+    <style name="ptr_headerContainer">
+        
+        <!-- Change the background color -->
+        <!-- <item name="android:background">@android:color/darker_gray</item>  -->
+    </style>
+    
+    <style name="ptr_text">
+        
+        <!-- Change the text style and color -->
+        <!-- <item name="android:textStyle">bold|italic</item>  -->
+        <!-- <item name="android:textColor">#cccccc</item> -->
+    </style>
+    
+</resources>
