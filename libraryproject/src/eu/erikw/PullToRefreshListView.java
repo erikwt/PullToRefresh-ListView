@@ -229,7 +229,7 @@ public class PullToRefreshListView extends ListView{
 					previousY = y;
 
 					int newHeaderPadding = Math.max(headerPadding + Math.round(diff), -header.getHeight()); 
-					if(state == State.REFRESHING && newHeaderPadding > 0){
+					if(!pinOnRefreshing && state == State.REFRESHING && newHeaderPadding > 0){
 						newHeaderPadding = 0;
 					}
 					
