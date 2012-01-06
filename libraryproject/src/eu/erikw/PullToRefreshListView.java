@@ -74,7 +74,7 @@ public class PullToRefreshListView extends ListView{
 	private int					headerPadding;
 	private boolean				scrollbarEnabled;
 	private boolean				bounceBackHeader;
-	private boolean				pinOnRefreshing;
+	private boolean				lockScrollWhileRefreshing;
 	private boolean 			hasResetHeader;
 
 	private State				state;
@@ -109,6 +109,54 @@ public class PullToRefreshListView extends ListView{
 	public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
 		this.onItemClickListener = onItemClickListener;
 	}
+
+	/**
+	 * Activate an OnRefreshListener to get notified on 'pull to refresh'
+	 * events.
+	 * 
+	 * @param onRefreshListener The OnRefreshListener to get notified
+	 */
+	public void setOnRefreshListener(OnRefreshListener onRefreshListener){
+		this.onRefreshListener = onRefreshListener;
+	}
+
+	/**
+	 * @return If the list is in 'Refreshing' state
+	 */
+	public boolean isRefreshing(){
+		return state == State.REFRESHING;
+	}
+
+	/**
+	 * Default is false. When lockScrollWhileRefreshing is set to true, the list
+	 * cannot scroll when in 'refreshing' mode. It's 'locked' on refreshing.
+	 * 
+	 * @param lockScrollWhileRefreshing
+	 */
+	public void setLockScrollWhileRefreshing(boolean lockScrollWhileRefreshing){
+		this.lockScrollWhileRefreshing = lockScrollWhileRefreshing;
+	}
+	
+	/**
+	 * Explicitly set the state to refreshing. This
+	 * is useful when you want to show the spinner and 'Refreshing' text when
+	 * the refresh was not triggered by 'pull to refresh', for example on start.
+	 */
+	public void setRefreshing(){
+		state = State.REFRESHING;
+		scrollTo(0, 0);
+		setUiRefreshing();
+		setHeaderPadding(0);
+	}
+
+	/**
+	 * Set the state back to 'pull to refresh'. Call this method when refreshing
+	 * the data is finished.
+	 */
+	public void onRefreshComplete(){
+		state = State.PULL_TO_REFRESH;
+		resetHeader();
+	}
 	
 	private void init(){
 		setVerticalFadingEdgeEnabled(false);
@@ -139,54 +187,6 @@ public class PullToRefreshListView extends ListView{
         super.setOnItemClickListener(new PTROnItemClickListener());
 	}
 
-	/**
-	 * Activate an OnRefreshListener to get notified on 'pull to refresh'
-	 * events.
-	 * 
-	 * @param onRefreshListener The OnRefreshListener to get notified
-	 */
-	public void setOnRefreshListener(OnRefreshListener onRefreshListener){
-		this.onRefreshListener = onRefreshListener;
-	}
-
-	/**
-	 * @return If the list is in 'Refreshing' state
-	 */
-	public boolean isRefreshing(){
-		return state == State.REFRESHING;
-	}
-
-	/**
-	 * Default is false. When pinOnRefreshing is set to true, the list
-	 * cannot scroll when in 'refreshing' mode. It's 'pinned' on refreshing.
-	 * 
-	 * @param pinOnRefreshing
-	 */
-	public void setPinOnRefreshing(boolean pinOnRefreshing){
-		this.pinOnRefreshing = pinOnRefreshing;
-	}
-	
-	/**
-	 * Explicitly set the state to refreshing. This
-	 * is useful when you want to show the spinner and 'Refreshing' text when
-	 * the refresh was not triggered by 'pull to refresh', for example on start.
-	 */
-	public void setRefreshing(){
-		state = State.REFRESHING;
-		scrollTo(0, 0);
-		setUiRefreshing();
-		setHeaderPadding(0);
-	}
-
-	/**
-	 * Set the state back to 'pull to refresh'. Call this method when refreshing
-	 * the data is finished.
-	 */
-	public void onRefreshComplete(){
-		state = State.PULL_TO_REFRESH;
-		resetHeader();
-	}
-
 	private void setHeaderPadding(int padding){
 		headerPadding = padding;
 
@@ -197,7 +197,9 @@ public class PullToRefreshListView extends ListView{
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event){
-		if(pinOnRefreshing && state == State.REFRESHING) return true;
+		if(lockScrollWhileRefreshing && state == State.REFRESHING){
+			return true;
+		}
 
 		switch(event.getAction()){
 			case MotionEvent.ACTION_DOWN:
@@ -229,7 +231,7 @@ public class PullToRefreshListView extends ListView{
 					previousY = y;
 
 					int newHeaderPadding = Math.max(headerPadding + Math.round(diff), -header.getHeight()); 
-					if(!pinOnRefreshing && state == State.REFRESHING && newHeaderPadding > 0){
+					if(!lockScrollWhileRefreshing && state == State.REFRESHING && newHeaderPadding > 0){
 						newHeaderPadding = 0;
 					}
 					
