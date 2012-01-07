@@ -1,4 +1,4 @@
-#  Android Pull to Refresh ListView
+#  Android 'Pull to Refresh' ListView library
 
 ![Screenshot](https://github.com/erikwt/PullToRefresh-ListView/raw/master/android-pull-to-refresh.png)
 
@@ -6,7 +6,7 @@
 
 ``` java
 /**
- * A generic Android ListView implementation that has 'Pull to Refresh' functionality.
+ * A generic, customizable Android ListView implementation that has 'Pull to Refresh' functionality.
  * 
  * This ListView can be used in place of the normal Android android.widget.ListView class.
  * 
@@ -27,6 +27,8 @@
 * Nice graphics (thanks to johannilsson - see credits)
 * Animations; bouncing animation and rotation animation
 * Easy to integrate in your Android project (see usage)
+* Works for any Android project targeting Android 1.6 (API level 4) and up
+* Highly customizable
 
 ## Info
 
