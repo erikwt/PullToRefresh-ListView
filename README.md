@@ -9,11 +9,7 @@ A generic, customizable, open source Android ListView implementation that has 'P
 
 ``` java
 /**
- * A generic, customizable Android ListView implementation that has 'Pull to Refresh' functionality.
- * 
- * This ListView can be used in place of the normal Android android.widget.ListView class.
- * 
- * Users of this class should implement OnRefreshListener and call setOnRefreshListener(..)
+ * Users of this library should implement OnRefreshListener and call setOnRefreshListener(..)
  * to get notified on refresh events. The using class should call onRefreshComplete() when
  * refreshing is finished.
  * 
@@ -21,10 +17,7 @@ A generic, customizable, open source Android ListView implementation that has 'P
  * is useful when you want to show the spinner and 'Refreshing' text when the
  * refresh was not triggered by 'Pull to Refresh', for example on start.
  * 
- * For more information, visit the project page:
- * https://github.com/erikwt/PullToRefresh-ListView
- * 
- * @author Erik Wallentinsen <dev+ptr@erikw.eu>
+ * @author Erik Wallentinsen <dev+ptr at erikw.eu>
  */
 ```
 
@@ -32,24 +25,24 @@ A generic, customizable, open source Android ListView implementation that has 'P
 ## Features
 * Drop-in replacement for the android.widget.ListView widget
 * Nice graphics (thanks to johannilsson - see credits)
-* Animations; bouncing animation and rotation animation
+* Animations; bouncing animation and rotation animation (see [video](http://www.youtube.com/watch?v=VjmdELnm3GI))
 * Easy to integrate in your Android project (see usage)
 * Works for any Android project targeting Android 1.6 (API level 4) and up
-* Highly customizable
+* Highly customizable (using Android styles)
 
 
 ## Info
 Feel free to ask questions, report bugs and request features at dev at erikw dot eu 
-or on the PullToRefresh-ListView github issue page:
-https://github.com/erikwt/PullToRefresh-ListView/issues
+or on the PullToRefresh-ListView github [issue](https://github.com/erikwt/PullToRefresh-ListView/issues) page. 
+You can also hit me up on [twitter](http://www.twitter.com/ewallentinsen) if that's your thing.
 
-You can also hit my up on [twitter](http://www.twitter.com/ewallentinsen) if that's your thing.
 
 ## Usage
 
 ### Example project
-Check out the example project in this repository for an implementation example. There is also more
-technical documentation available as javadoc in the library project code.
+Check out the [example project](https://github.com/erikwt/PullToRefresh-ListView/tree/master/sampleproject) 
+in this repository for an implementation example. There is also moretechnical documentation available as 
+javadoc in the [library project code](https://github.com/erikwt/PullToRefresh-ListView/blob/master/libraryproject/src/eu/erikw/PullToRefreshListView.java).
 
 ### Layout
 
@@ -131,12 +124,11 @@ using these great 'Pull to Refresh' libraries;
 
 
 ## Credits
-* johannilsson for the original PullToRefresh project that I used as a base and used some graphics from: https://github.com/johannilsson/android-pulltorefresh
+* johannilsson for the original PullToRefresh project and some graphics: https://github.com/johannilsson/android-pulltorefresh
 * chrisbanes for the layout of this README and for inspiring me to opensource this project as well (http://github.com/chrisbanes/Android-PullToRefresh)
 
 
 ## License
-
 Copyright (c) 2012 - Erik Wallentinsen
 
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
