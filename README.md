@@ -80,6 +80,28 @@ listView.setOnRefreshListener(new OnRefreshListener() {
 
 ```
 
+### Style
+To change the looks of the 'PullToRefresh' ListView, you can override the styles that are defined in the library project.
+Default, the looks are very basic (see screenshot above), with black text on a white background. You can change every
+aspect to your needs though, like the arrow image, text size, text color and background.
+
+To do so, override the style attributes to your liking, like the following example:
+``` xml
+<style name="ptr_text">
+        
+    <!-- Change the text style and color -->
+    <item name="android:textStyle">bold|italic</item>
+    <item name="android:textColor">#cccccc</item>
+</style>
+```
+The various styles you can override are;
+
+* ptr_headerContainer
+* ptr_header
+* ptr_arrow
+* ptr_spinner
+* ptr_text
+
 ## Other projects
 This project might not be the best library for you to use in your project, depending on your likes and needs. Consider
 using these great 'Pull to Refresh' libraries;
