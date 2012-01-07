@@ -23,7 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
- * A generic Android ListView implementation that has 'Pull to Refresh' functionality.
+ * A generic, customizable Android ListView implementation that has 'Pull to Refresh' functionality.
  * 
  * This ListView can be used in place of the normal Android android.widget.ListView class.
  * 
