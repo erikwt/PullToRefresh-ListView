@@ -76,14 +76,16 @@ public class PullToRefreshListView extends ListView{
 	private boolean				bounceBackHeader;
 	private boolean				lockScrollWhileRefreshing;
 	private boolean 			hasResetHeader;
+    private String              pullToRefreshText;
+    private String              releaseToRefreshText;
+    private String              refreshingText;
 
 	private State				state;
 	private LinearLayout		headerContainer;
 	private RelativeLayout		header;
 	private RotateAnimation		flipAnimation;
 	private RotateAnimation		reverseFlipAnimation;
-	private TranslateAnimation	bounceAnimation;
-	private ImageView			image;
+    private ImageView			image;
 	private ProgressBar			spinner;
 	private TextView			text;
 	private OnItemClickListener onItemClickListener;
@@ -157,6 +159,39 @@ public class PullToRefreshListView extends ListView{
 		state = State.PULL_TO_REFRESH;
 		resetHeader();
 	}
+
+    /**
+     * Change the label text on state 'Pull to Refresh'
+     * @param pullToRefreshText Text
+     */
+    public void setTextPullToRefresh(String pullToRefreshText){
+        this.pullToRefreshText = pullToRefreshText;
+        if(state == State.PULL_TO_REFRESH){
+            text.setText(pullToRefreshText);
+        }
+    }
+
+    /**
+     * Change the label text on state 'Release to Refresh'
+     * @param releaseToRefreshText Text
+     */
+    public void setTextReleaseToRefresh(String releaseToRefreshText){
+        this.releaseToRefreshText = releaseToRefreshText;
+        if(state == State.RELEASE_TO_REFRESH){
+            text.setText(releaseToRefreshText);
+        }
+    }
+
+    /**
+     * Change the label text on state 'Refreshing'
+     * @param refreshingText Text
+     */
+    public void setTextRefreshing(String refreshingText){
+        this.refreshingText = refreshingText;
+        if(state == State.REFRESHING){
+            text.setText(refreshingText);
+        }
+    }
 	
 	private void init(){
 		setVerticalFadingEdgeEnabled(false);
@@ -166,6 +201,10 @@ public class PullToRefreshListView extends ListView{
 		text = (TextView) header.findViewById(R.id.text);
 		image = (ImageView) header.findViewById(R.id.image);
 		spinner = (ProgressBar) header.findViewById(R.id.spinner);
+
+        pullToRefreshText = getContext().getString(R.string.ptr_pull_to_refresh);
+        releaseToRefreshText = getContext().getString(R.string.ptr_release_to_refresh);
+        refreshingText = getContext().getString(R.string.ptr_refreshing);
 
 		flipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		flipAnimation.setInterpolator(new LinearInterpolator());
@@ -259,11 +298,11 @@ public class PullToRefreshListView extends ListView{
 	private void bounceBackHeader(){
 		int yTranslate = state == State.REFRESHING ? -(headerContainer.getHeight() - header.getHeight()) : -headerContainer.getHeight();
 
-		bounceAnimation = new TranslateAnimation(
-				TranslateAnimation.ABSOLUTE, 0,
-				TranslateAnimation.ABSOLUTE, 0,
-				TranslateAnimation.ABSOLUTE, 0,
-				TranslateAnimation.ABSOLUTE, yTranslate);
+        TranslateAnimation bounceAnimation = new TranslateAnimation(
+                TranslateAnimation.ABSOLUTE, 0,
+                TranslateAnimation.ABSOLUTE, 0,
+                TranslateAnimation.ABSOLUTE, 0,
+                TranslateAnimation.ABSOLUTE, yTranslate);
 
 		bounceAnimation.setDuration(BOUNCE_ANIMATION_DURATION);
 		bounceAnimation.setFillEnabled(true);
@@ -292,7 +331,7 @@ public class PullToRefreshListView extends ListView{
 		spinner.setVisibility(View.VISIBLE);
 		image.clearAnimation();
 		image.setVisibility(View.INVISIBLE);
-		text.setText(R.string.ptr_refreshing);
+		text.setText(refreshingText);
 	}
 
 	private void setState(State state){
@@ -301,13 +340,13 @@ public class PullToRefreshListView extends ListView{
 			case PULL_TO_REFRESH:
 				spinner.setVisibility(View.INVISIBLE);
 				image.setVisibility(View.VISIBLE);
-				text.setText(R.string.ptr_pull_to_refresh);
+				text.setText(pullToRefreshText);
 				break;
 
 			case RELEASE_TO_REFRESH:
 				spinner.setVisibility(View.INVISIBLE);
 				image.setVisibility(View.VISIBLE);
-				text.setText(R.string.ptr_release_to_refresh);
+				text.setText(releaseToRefreshText);
 				break;
 
 			case REFRESHING:
