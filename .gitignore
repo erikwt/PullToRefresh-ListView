@@ -19,3 +19,6 @@ gen
 *R.java
 
 *~
+
+# IntelliJ IDE
+*.iml
