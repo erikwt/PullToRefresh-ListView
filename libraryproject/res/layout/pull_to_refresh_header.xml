@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" style="@style/ptr_headerContainer">
-    <RelativeLayout android:id="@+id/header" style="@style/ptr_header">
-	    <ImageView android:id="@+id/image" style="@style/ptr_arrow" />
-	    <ProgressBar android:id="@+id/spinner" style="@style/ptr_spinner" />
-	    <TextView android:id="@+id/text" style="@style/ptr_text" />
-    </RelativeLayout>
-</LinearLayout>

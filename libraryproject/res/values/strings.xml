@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PullToRefreshListView</string>
-
     <string name="ptr_pull_to_refresh">Pull to refresh</string>
     <string name="ptr_release_to_refresh">Release to refresh</string>
     <string name="ptr_refreshing">Refreshing</string>
