@@ -20,7 +20,7 @@ public class PullToRefreshListViewSampleActivity extends Activity {
 		items.add("Chelsea");
 		items.add("Real Madrid");
 		items.add("Bayern Munchen");
-		items.add("Internationale");
+		items.add("Internazionale");
 		items.add("Valencia");
 		items.add("Arsenal");
 		items.add("AS Roma");
