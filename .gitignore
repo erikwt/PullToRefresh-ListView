@@ -22,3 +22,5 @@ gen
 
 # IntelliJ IDE
 *.iml
+.idea
+out

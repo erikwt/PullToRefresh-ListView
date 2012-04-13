@@ -1,5 +1,8 @@
 package eu.erikw;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -70,6 +73,8 @@ public class PullToRefreshListView extends ListView{
 
 	private static int 			measuredHeaderHeight;
 
+	private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
 	private float				previousY;
 	private int					headerPadding;
 	private boolean				scrollbarEnabled;
@@ -79,6 +84,8 @@ public class PullToRefreshListView extends ListView{
     private String              pullToRefreshText;
     private String              releaseToRefreshText;
     private String              refreshingText;
+    private String				lastUpdatedText;
+    private long				lastUpdated = -1;
 
 	private State				state;
 	private LinearLayout		headerContainer;
@@ -88,6 +95,7 @@ public class PullToRefreshListView extends ListView{
     private ImageView			image;
 	private ProgressBar			spinner;
 	private TextView			text;
+	private TextView 			lastUpdatedTextView;
 	private OnItemClickListener onItemClickListener;
 	private OnRefreshListener	onRefreshListener;
 
@@ -158,6 +166,7 @@ public class PullToRefreshListView extends ListView{
 	public void onRefreshComplete(){
 		state = State.PULL_TO_REFRESH;
 		resetHeader();
+		lastUpdated = System.currentTimeMillis();
 	}
 
     /**
@@ -196,15 +205,17 @@ public class PullToRefreshListView extends ListView{
 	private void init(){
 		setVerticalFadingEdgeEnabled(false);
 
-		headerContainer = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header, null);
-		header = (RelativeLayout) headerContainer.findViewById(R.id.header);
-		text = (TextView) header.findViewById(R.id.text);
-		image = (ImageView) header.findViewById(R.id.image);
-		spinner = (ProgressBar) header.findViewById(R.id.spinner);
+		headerContainer = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.ptr_header, null);
+		header = (RelativeLayout) headerContainer.findViewById(R.id.ptr_id_header);
+		text = (TextView) header.findViewById(R.id.ptr_id_text);
+		lastUpdatedTextView = (TextView) header.findViewById(R.id.ptr_id_last_updated);
+		image = (ImageView) header.findViewById(R.id.ptr_id_image);
+		spinner = (ProgressBar) header.findViewById(R.id.ptr_id_spinner);
 
         pullToRefreshText = getContext().getString(R.string.ptr_pull_to_refresh);
         releaseToRefreshText = getContext().getString(R.string.ptr_release_to_refresh);
         refreshingText = getContext().getString(R.string.ptr_refreshing);
+        lastUpdatedText = getContext().getString(R.string.ptr_last_updated);
 
 		flipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		flipAnimation.setInterpolator(new LinearInterpolator());
@@ -341,6 +352,10 @@ public class PullToRefreshListView extends ListView{
 				spinner.setVisibility(View.INVISIBLE);
 				image.setVisibility(View.VISIBLE);
 				text.setText(pullToRefreshText);
+				if (lastUpdated == -1) {
+				 	 lastUpdated = System.currentTimeMillis();
+				}
+				lastUpdatedTextView.setText(String.format(lastUpdatedText, formatter.format(Calendar.getInstance().getTime())));
 				break;
 
 			case RELEASE_TO_REFRESH:

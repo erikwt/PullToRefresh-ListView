@@ -16,7 +16,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_centerVertical">true</item>
-        <item name="android:src">@drawable/ic_pulltorefresh_arrow</item>
+        <item name="android:src">@drawable/ptr_pulltorefresh_arrow</item>
         <item name="android:paddingLeft">25dp</item>
         <item name="android:paddingRight">25dp</item>
     </style>
@@ -34,10 +34,12 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_centerHorizontal">true</item>
-        <item name="android:layout_centerVertical">true</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
     
+    <style name="ptr_last_updated" parent="ptr_text">
+	 	 <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+	</style>
 </resources>
