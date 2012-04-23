@@ -51,7 +51,12 @@ public class PullToRefreshListViewSampleActivity extends Activity {
         // OPTIONAL: Uncomment this if you want to override the date/time format of the 'last updated' field
         // listView.setLastUpdatedDateFormat(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"));
 
-        // Set the onRefreshListener on the list. You could also use
+        // OPTIONAL: Uncomment this if you want to override the default strings
+        // listView.setTextPullToRefresh("Pull to Refresh");
+        // listView.setTextReleaseToRefresh("Release to Refresh");
+        // listView.setTextRefreshing("Refreshing");
+
+        // MANDATORY: Set the onRefreshListener on the list. You could also use
         // listView.setOnRefreshListener(this); and let this Activity
         // implement OnRefreshListener.
         listView.setOnRefreshListener(new OnRefreshListener() {
