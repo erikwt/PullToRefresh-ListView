@@ -1,12 +1,12 @@
 package eu.erikw;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.view.*;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -71,14 +71,19 @@ public class PullToRefreshListView extends ListView{
 	private static int 			measuredHeaderHeight;
 
 	private float				previousY;
-	private int					headerPadding;
-	private boolean				scrollbarEnabled;
-	private boolean				bounceBackHeader;
-	private boolean				lockScrollWhileRefreshing;
-	private boolean 			hasResetHeader;
+
+    private int					headerPadding;
+    private boolean				scrollbarEnabled;
+    private boolean				bounceBackHeader;
+    private boolean				lockScrollWhileRefreshing;
+    private boolean 			hasResetHeader;
     private String              pullToRefreshText;
     private String              releaseToRefreshText;
     private String              refreshingText;
+    private boolean             showLastUpdatedText;
+    private String				lastUpdatedText;
+    private long				lastUpdated = -1;
+    private SimpleDateFormat    lastUpdatedDateFormat = new SimpleDateFormat("dd/MM HH:mm");
 
 	private State				state;
 	private LinearLayout		headerContainer;
@@ -88,6 +93,7 @@ public class PullToRefreshListView extends ListView{
     private ImageView			image;
 	private ProgressBar			spinner;
 	private TextView			text;
+	private TextView 			lastUpdatedTextView;
 	private OnItemClickListener onItemClickListener;
 	private OnRefreshListener	onRefreshListener;
 
@@ -138,6 +144,28 @@ public class PullToRefreshListView extends ListView{
 	public void setLockScrollWhileRefreshing(boolean lockScrollWhileRefreshing){
 		this.lockScrollWhileRefreshing = lockScrollWhileRefreshing;
 	}
+
+    /**
+     * Default is false. Show the last-updated date/time in the 'Pull ro Refresh'
+     * header. See 'setLastUpdatedDateFormat' to set the date/time formatting.
+     *
+     * @param showLastUpdatedText
+     */
+    public void setShowLastUpdatedText(boolean showLastUpdatedText){
+        this.showLastUpdatedText = showLastUpdatedText;
+        if(!showLastUpdatedText) lastUpdatedTextView.setVisibility(View.GONE);
+    }
+
+    /**
+     * Default: "dd/MM HH:mm". Set the format in which the last-updated
+     * date/time is shown. Meaningless if 'showLastUpdatedText == false (default)'.
+     * See 'setShowLastUpdatedText'.
+     *
+     * @param lastUpdatedDateFormat
+     */
+    public void setLastUpdatedDateFormat(SimpleDateFormat lastUpdatedDateFormat){
+        this.lastUpdatedDateFormat = lastUpdatedDateFormat;
+    }
 	
 	/**
 	 * Explicitly set the state to refreshing. This
@@ -158,6 +186,7 @@ public class PullToRefreshListView extends ListView{
 	public void onRefreshComplete(){
 		state = State.PULL_TO_REFRESH;
 		resetHeader();
+		lastUpdated = System.currentTimeMillis();
 	}
 
     /**
@@ -199,12 +228,14 @@ public class PullToRefreshListView extends ListView{
 		headerContainer = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.ptr_header, null);
 		header = (RelativeLayout) headerContainer.findViewById(R.id.ptr_id_header);
 		text = (TextView) header.findViewById(R.id.ptr_id_text);
+		lastUpdatedTextView = (TextView) header.findViewById(R.id.ptr_id_last_updated);
 		image = (ImageView) header.findViewById(R.id.ptr_id_image);
 		spinner = (ProgressBar) header.findViewById(R.id.ptr_id_spinner);
 
         pullToRefreshText = getContext().getString(R.string.ptr_pull_to_refresh);
         releaseToRefreshText = getContext().getString(R.string.ptr_release_to_refresh);
         refreshingText = getContext().getString(R.string.ptr_refreshing);
+        lastUpdatedText = getContext().getString(R.string.ptr_last_updated);
 
 		flipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		flipAnimation.setInterpolator(new LinearInterpolator());
@@ -341,7 +372,13 @@ public class PullToRefreshListView extends ListView{
 				spinner.setVisibility(View.INVISIBLE);
 				image.setVisibility(View.VISIBLE);
 				text.setText(pullToRefreshText);
-				break;
+
+                if(showLastUpdatedText && lastUpdated != -1){
+                    lastUpdatedTextView.setVisibility(View.VISIBLE);
+                    lastUpdatedTextView.setText(String.format(lastUpdatedText, lastUpdatedDateFormat.format(new Date(lastUpdated))));
+                }
+
+                break;
 
 			case RELEASE_TO_REFRESH:
 				spinner.setVisibility(View.INVISIBLE);
@@ -352,7 +389,8 @@ public class PullToRefreshListView extends ListView{
 			case REFRESHING:
 				setUiRefreshing();
 
-				if(onRefreshListener == null){
+                lastUpdated = System.currentTimeMillis();
+                if(onRefreshListener == null){
 					setState(State.PULL_TO_REFRESH);
 				}else{
 					onRefreshListener.onRefresh();

@@ -1,5 +1,6 @@
 package eu.erikw.pulltorefresh.sample;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -43,7 +44,13 @@ public class PullToRefreshListViewSampleActivity extends Activity {
         setContentView(R.layout.main);
         
         listView = (PullToRefreshListView) findViewById(R.id.pull_to_refresh_listview);
-        
+
+        // OPTIONAL: Uncomment this if you want the Pull to Refresh header to show the 'last updated' time
+        // listView.setShowLastUpdatedText(true);
+
+        // OPTIONAL: Uncomment this if you want to override the date/time format of the 'last updated' field
+        // listView.setLastUpdatedDateFormat(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"));
+
         // Set the onRefreshListener on the list. You could also use
         // listView.setOnRefreshListener(this); and let this Activity
         // implement OnRefreshListener.
