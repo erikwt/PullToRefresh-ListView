@@ -1,26 +1,16 @@
 package eu.erikw;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.*;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.animation.Animation;
+import android.view.animation.*;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.OvershootInterpolator;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * A generic, customizable Android ListView implementation that has 'Pull to Refresh' functionality.
@@ -71,8 +61,8 @@ public class PullToRefreshListView extends ListView{
 	private static int 			measuredHeaderHeight;
 
 	private float				previousY;
-
-    private int					headerPadding;
+    private int                 headerPositionY;
+    private int                 headerPadding;
     private boolean				scrollbarEnabled;
     private boolean				bounceBackHeader;
     private boolean				lockScrollWhileRefreshing;
@@ -261,14 +251,15 @@ public class PullToRefreshListView extends ListView{
 		headerPadding = padding;
 
 		MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) header.getLayoutParams();
-		mlp.setMargins(0, padding, 0, 0);
+		mlp.setMargins(0, Math.round(padding), 0, 0);
 		header.setLayoutParams(mlp);
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event){
-		if(lockScrollWhileRefreshing && state == State.REFRESHING){
-			return true;
+		if(lockScrollWhileRefreshing
+                && (state == State.REFRESHING || getAnimation() != null && !getAnimation().hasEnded())){
+            return true;
 		}
 
 		switch(event.getAction()){
@@ -298,26 +289,28 @@ public class PullToRefreshListView extends ListView{
 					float y = event.getY();
 					float diff = y - previousY;
 					if(diff > 0) diff /= PULL_RESISTANCE;
+                    else if(state == State.REFRESHING) headerPositionY -= diff;
 					previousY = y;
 
-					int newHeaderPadding = Math.max(headerPadding + Math.round(diff), -header.getHeight()); 
-					if(!lockScrollWhileRefreshing && state == State.REFRESHING && newHeaderPadding > 0){
-						newHeaderPadding = 0;
-					}
-					
-					setHeaderPadding(newHeaderPadding);
+					int newHeaderPadding = Math.max(Math.round(headerPadding + diff), -header.getHeight());
 
-					if(state == State.PULL_TO_REFRESH && headerPadding > 0){
-						setState(State.RELEASE_TO_REFRESH);
+                    if(newHeaderPadding != headerPadding && state != State.REFRESHING){
+                        setHeaderPadding(newHeaderPadding);
 
-						image.clearAnimation();
-						image.startAnimation(flipAnimation);
-					}else if(state == State.RELEASE_TO_REFRESH && headerPadding < 0){
-						setState(State.PULL_TO_REFRESH);
+                        if(state == State.PULL_TO_REFRESH && headerPadding > 0){
+                            setState(State.RELEASE_TO_REFRESH);
 
-						image.clearAnimation();
-						image.startAnimation(reverseFlipAnimation);
-					}
+                            image.clearAnimation();
+                            image.startAnimation(flipAnimation);
+                        }else if(state == State.RELEASE_TO_REFRESH && headerPadding < 0){
+                            setState(State.PULL_TO_REFRESH);
+
+                            image.clearAnimation();
+                            image.startAnimation(reverseFlipAnimation);
+                        }
+
+                        return true;
+                    }
 				}
 
 				break;
@@ -327,7 +320,15 @@ public class PullToRefreshListView extends ListView{
 	}
 
 	private void bounceBackHeader(){
-		int yTranslate = state == State.REFRESHING ? -(headerContainer.getHeight() - header.getHeight()) : -headerContainer.getHeight();
+		int yTranslate = state == State.REFRESHING ?
+                header.getHeight() - headerContainer.getHeight() :
+                -headerContainer.getHeight() - Math.round(headerPositionY);
+
+//        Log.i("GREPME", "state: " + state);
+//        Log.i("GREPME", "scrolly: " + headerPositionY);
+//        Log.i("GREPME", "measuredHeaderHeight: " + measuredHeaderHeight);
+//        Log.i("GREPME", "headerPadding: " + headerPadding);
+//        Log.i("GREPME", "ytranslate: " + yTranslate);
 
         TranslateAnimation bounceAnimation = new TranslateAnimation(
                 TranslateAnimation.ABSOLUTE, 0,
@@ -340,16 +341,17 @@ public class PullToRefreshListView extends ListView{
 		bounceAnimation.setFillAfter(false);
 		bounceAnimation.setFillBefore(true);
 		bounceAnimation.setInterpolator(new OvershootInterpolator(BOUNCE_OVERSHOOT_TENSION));
-		bounceAnimation.setAnimationListener(new HeaderAnimationListener());
+		bounceAnimation.setAnimationListener(new HeaderAnimationListener(yTranslate));
 
 		startAnimation(bounceAnimation);
 	}
 
 	private void resetHeader(){
-		if(headerPadding == -header.getHeight() || getFirstVisiblePosition() > 0){
-			setState(State.PULL_TO_REFRESH);
-			return;
-		}
+		if(getFirstVisiblePosition() > 0){
+            setHeaderPadding(-header.getHeight());
+            setState(State.PULL_TO_REFRESH);
+            return;
+        }
 
 		if(getAnimation() != null && !getAnimation().hasEnded()){
 			bounceBackHeader = true;
@@ -415,8 +417,12 @@ public class PullToRefreshListView extends ListView{
 
 	private class HeaderAnimationListener implements AnimationListener{
 
-		private int		height;
+		private int		height, translation;
 		private State	stateAtAnimationStart;
+
+        public HeaderAnimationListener(int translation){
+            this.translation = translation;
+        }
 
 		@Override
 		public void onAnimationStart(Animation animation){
@@ -424,7 +430,7 @@ public class PullToRefreshListView extends ListView{
 
 			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
 			height = lp.height;
-			lp.height = getHeight() + headerContainer.getHeight();
+			lp.height = getHeight() - translation;
 			setLayoutParams(lp);
 
 			if(scrollbarEnabled){
@@ -434,7 +440,8 @@ public class PullToRefreshListView extends ListView{
 
 		@Override
 		public void onAnimationEnd(Animation animation){
-			setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -header.getHeight());
+			setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -measuredHeaderHeight);
+            setSelection(0);
 
 			android.view.ViewGroup.LayoutParams lp = getLayoutParams();
 			lp.height = height;
@@ -451,7 +458,7 @@ public class PullToRefreshListView extends ListView{
 
 					@Override
 					public void run(){
-						bounceBackHeader();
+						resetHeader();
 					}
 				}, BOUNCE_ANIMATION_DELAY);
 			}else if(stateAtAnimationStart != State.REFRESHING){
