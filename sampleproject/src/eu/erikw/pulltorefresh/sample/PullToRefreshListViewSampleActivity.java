@@ -45,6 +45,9 @@ public class PullToRefreshListViewSampleActivity extends Activity {
         
         listView = (PullToRefreshListView) findViewById(R.id.pull_to_refresh_listview);
 
+        // OPTIONAL: Disable scrolling when list is refreshing
+        // listView.setLockScrollWhileRefreshing(false);
+
         // OPTIONAL: Uncomment this if you want the Pull to Refresh header to show the 'last updated' time
         // listView.setShowLastUpdatedText(true);
 
