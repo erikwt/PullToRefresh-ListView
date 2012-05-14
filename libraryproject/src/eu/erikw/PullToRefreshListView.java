@@ -10,6 +10,7 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
@@ -51,6 +52,7 @@ public class PullToRefreshListView extends ListView{
     private static final int   BOUNCE_ANIMATION_DELAY          = 100;
     private static final float BOUNCE_OVERSHOOT_TENSION        = 1.4f;
     private static final int   ROTATE_ARROW_ANIMATION_DURATION = 250;
+    private Animation rotateAnimation;
 
     private static enum State{
         PULL_TO_REFRESH,
@@ -94,7 +96,7 @@ public class PullToRefreshListView extends ListView{
     private RotateAnimation     flipAnimation;
     private RotateAnimation     reverseFlipAnimation;
     private ImageView           image;
-    private ProgressBar         spinner;
+    private ImageView spinner;
     private TextView            text;
     private TextView            lastUpdatedTextView;
     private OnItemClickListener onItemClickListener;
@@ -236,7 +238,8 @@ public class PullToRefreshListView extends ListView{
         text = (TextView) header.findViewById(R.id.ptr_id_text);
         lastUpdatedTextView = (TextView) header.findViewById(R.id.ptr_id_last_updated);
         image = (ImageView) header.findViewById(R.id.ptr_id_image);
-        spinner = (ProgressBar) header.findViewById(R.id.ptr_id_spinner);
+        spinner = (ImageView) header.findViewById(R.id.ptr_id_spinner);
+        rotateAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.rotate);
 
         pullToRefreshText = getContext().getString(R.string.ptr_pull_to_refresh);
         releaseToRefreshText = getContext().getString(R.string.ptr_release_to_refresh);
@@ -340,12 +343,6 @@ public class PullToRefreshListView extends ListView{
                 header.getHeight() - headerContainer.getHeight() :
                 -headerContainer.getHeight() - Math.round(headerPositionY);
 
-//        Log.i("GREPME", "state: " + state);
-//        Log.i("GREPME", "scrolly: " + headerPositionY);
-//        Log.i("GREPME", "measuredHeaderHeight: " + measuredHeaderHeight);
-//        Log.i("GREPME", "headerPadding: " + headerPadding);
-//        Log.i("GREPME", "ytranslate: " + yTranslate);
-
         TranslateAnimation bounceAnimation = new TranslateAnimation(
                 TranslateAnimation.ABSOLUTE, 0,
                 TranslateAnimation.ABSOLUTE, 0,
@@ -378,6 +375,7 @@ public class PullToRefreshListView extends ListView{
 
     private void setUiRefreshing(){
         spinner.setVisibility(View.VISIBLE);
+        spinner.startAnimation(rotateAnimation);
         image.clearAnimation();
         image.setVisibility(View.INVISIBLE);
         text.setText(refreshingText);
@@ -387,6 +385,7 @@ public class PullToRefreshListView extends ListView{
         this.state = state;
         switch(state){
             case PULL_TO_REFRESH:
+                spinner.clearAnimation();
                 spinner.setVisibility(View.INVISIBLE);
                 image.setVisibility(View.VISIBLE);
                 text.setText(pullToRefreshText);
