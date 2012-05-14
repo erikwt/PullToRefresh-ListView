@@ -52,7 +52,9 @@ public class PullToRefreshListView extends ListView{
     private static final int   BOUNCE_ANIMATION_DELAY          = 100;
     private static final float BOUNCE_OVERSHOOT_TENSION        = 1.4f;
     private static final int   ROTATE_ARROW_ANIMATION_DURATION = 250;
-    private Animation rotateAnimation;
+    private Animation a;
+
+    private boolean easteregg;
 
     private static enum State{
         PULL_TO_REFRESH,
@@ -91,7 +93,7 @@ public class PullToRefreshListView extends ListView{
     private boolean hasResetHeader;
     private long lastUpdated = -1;
     private State               state;
-    private LinearLayout        headerContainer;
+    private View headerContainer;
     private RelativeLayout      header;
     private RotateAnimation     flipAnimation;
     private RotateAnimation     reverseFlipAnimation;
@@ -101,6 +103,8 @@ public class PullToRefreshListView extends ListView{
     private TextView            lastUpdatedTextView;
     private OnItemClickListener onItemClickListener;
     private OnRefreshListener   onRefreshListener;
+    private Animation rotateAnimation;
+    private View easterEgg1;
 
 
     public PullToRefreshListView(Context context){
@@ -233,13 +237,28 @@ public class PullToRefreshListView extends ListView{
     private void init(){
         setVerticalFadingEdgeEnabled(false);
 
-        headerContainer = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.ptr_header, null);
+        headerContainer = LayoutInflater.from(getContext()).inflate(R.layout.ptr_header, null);
         header = (RelativeLayout) headerContainer.findViewById(R.id.ptr_id_header);
         text = (TextView) header.findViewById(R.id.ptr_id_text);
         lastUpdatedTextView = (TextView) header.findViewById(R.id.ptr_id_last_updated);
         image = (ImageView) header.findViewById(R.id.ptr_id_image);
         spinner = (ImageView) header.findViewById(R.id.ptr_id_spinner);
         rotateAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.rotate);
+
+        if(easteregg){
+            easterEgg1 = headerContainer.findViewById(R.id.ptr_easteregga);
+            // Easter egg
+            a = AnimationUtils.loadAnimation(getContext(), R.anim.push_bottom_in);
+            a.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    easterEgg1.setVisibility(View.VISIBLE);
+                }
+
+                public void onAnimationEnd(Animation animation) {}
+                public void onAnimationRepeat(Animation animation) {}
+            });
+        }
 
         pullToRefreshText = getContext().getString(R.string.ptr_pull_to_refresh);
         releaseToRefreshText = getContext().getString(R.string.ptr_release_to_refresh);
@@ -390,6 +409,11 @@ public class PullToRefreshListView extends ListView{
                 image.setVisibility(View.VISIBLE);
                 text.setText(pullToRefreshText);
 
+                if(easteregg){
+                    easterEgg1.clearAnimation();
+                    easterEgg1.setVisibility(View.GONE);
+                }
+
                 if(showLastUpdatedText && lastUpdated != -1){
                     lastUpdatedTextView.setVisibility(View.VISIBLE);
                     lastUpdatedTextView.setText(String.format(lastUpdatedText, lastUpdatedDateFormat.format(new Date(lastUpdated))));
@@ -401,6 +425,11 @@ public class PullToRefreshListView extends ListView{
                 spinner.setVisibility(View.INVISIBLE);
                 image.setVisibility(View.VISIBLE);
                 text.setText(releaseToRefreshText);
+
+                if(easteregg){
+                    easterEgg1.startAnimation(a);
+                }
+
                 break;
 
             case REFRESHING:
