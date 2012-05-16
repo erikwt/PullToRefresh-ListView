@@ -52,9 +52,59 @@ public class PullToRefreshListView extends ListView{
     private static final int   BOUNCE_ANIMATION_DELAY          = 100;
     private static final float BOUNCE_OVERSHOOT_TENSION        = 1.4f;
     private static final int   ROTATE_ARROW_ANIMATION_DURATION = 250;
-    private Animation a;
+    private Animation a, b, c;
 
     private boolean easteregg;
+
+    public void setEasterEgg(boolean easteregg){
+        this.easteregg = easteregg;
+        
+        if(easteregg){
+            easterEgg1 = header.findViewById(R.id.ptr_easteregga);
+            easterEgg2 = header.findViewById(R.id.ptr_eastereggb);
+            easterEgg3 = header.findViewById(R.id.ptr_eastereggc);
+
+            // Easter egg
+            a = AnimationUtils.loadAnimation(getContext(), R.anim.push_bottom_in);
+            a.setInterpolator(new OvershootInterpolator(1.6f));
+            b = AnimationUtils.loadAnimation(getContext(), R.anim.push_bottom_in);
+            b.setInterpolator(new OvershootInterpolator(1.6f));
+            c = AnimationUtils.loadAnimation(getContext(), R.anim.push_bottom_in);
+            c.setInterpolator(new OvershootInterpolator(1.6f));
+
+            a.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    easterEgg1.setVisibility(View.VISIBLE);
+                }
+
+                public void onAnimationEnd(Animation animation) {}
+                public void onAnimationRepeat(Animation animation) {}
+            });
+
+            b.setAnimationListener(new Animation.AnimationListener(){
+                @Override
+                public void onAnimationStart(Animation animation){
+                    easterEgg2.setVisibility(View.VISIBLE);
+                }
+
+                public void onAnimationEnd(Animation animation){}
+
+                public void onAnimationRepeat(Animation animation){}
+            });
+
+            c.setAnimationListener(new Animation.AnimationListener(){
+                @Override
+                public void onAnimationStart(Animation animation){
+                    easterEgg3.setVisibility(View.VISIBLE);
+                }
+
+                public void onAnimationEnd(Animation animation){}
+
+                public void onAnimationRepeat(Animation animation){}
+            });
+        }
+    }
 
     private static enum State{
         PULL_TO_REFRESH,
@@ -99,12 +149,12 @@ public class PullToRefreshListView extends ListView{
     private RotateAnimation     reverseFlipAnimation;
     private ImageView           image;
     private ImageView spinner;
-    private TextView            text;
+//    private TextView            text;
     private TextView            lastUpdatedTextView;
     private OnItemClickListener onItemClickListener;
     private OnRefreshListener   onRefreshListener;
     private Animation rotateAnimation;
-    private View easterEgg1;
+    private View easterEgg1, easterEgg2, easterEgg3;
 
 
     public PullToRefreshListView(Context context){
@@ -206,7 +256,7 @@ public class PullToRefreshListView extends ListView{
     public void setTextPullToRefresh(String pullToRefreshText){
         this.pullToRefreshText = pullToRefreshText;
         if(state == State.PULL_TO_REFRESH){
-            text.setText(pullToRefreshText);
+//            text.setText(pullToRefreshText);
         }
     }
 
@@ -218,7 +268,7 @@ public class PullToRefreshListView extends ListView{
     public void setTextReleaseToRefresh(String releaseToRefreshText){
         this.releaseToRefreshText = releaseToRefreshText;
         if(state == State.RELEASE_TO_REFRESH){
-            text.setText(releaseToRefreshText);
+//            text.setText(releaseToRefreshText);
         }
     }
 
@@ -230,7 +280,7 @@ public class PullToRefreshListView extends ListView{
     public void setTextRefreshing(String refreshingText){
         this.refreshingText = refreshingText;
         if(state == State.REFRESHING){
-            text.setText(refreshingText);
+//            text.setText(refreshingText);
         }
     }
 
@@ -239,26 +289,9 @@ public class PullToRefreshListView extends ListView{
 
         headerContainer = LayoutInflater.from(getContext()).inflate(R.layout.ptr_header, null);
         header = (RelativeLayout) headerContainer.findViewById(R.id.ptr_id_header);
-        text = (TextView) header.findViewById(R.id.ptr_id_text);
-        lastUpdatedTextView = (TextView) header.findViewById(R.id.ptr_id_last_updated);
         image = (ImageView) header.findViewById(R.id.ptr_id_image);
         spinner = (ImageView) header.findViewById(R.id.ptr_id_spinner);
         rotateAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.rotate);
-
-        if(easteregg){
-            easterEgg1 = headerContainer.findViewById(R.id.ptr_easteregga);
-            // Easter egg
-            a = AnimationUtils.loadAnimation(getContext(), R.anim.push_bottom_in);
-            a.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    easterEgg1.setVisibility(View.VISIBLE);
-                }
-
-                public void onAnimationEnd(Animation animation) {}
-                public void onAnimationRepeat(Animation animation) {}
-            });
-        }
 
         pullToRefreshText = getContext().getString(R.string.ptr_pull_to_refresh);
         releaseToRefreshText = getContext().getString(R.string.ptr_release_to_refresh);
@@ -397,7 +430,7 @@ public class PullToRefreshListView extends ListView{
         spinner.startAnimation(rotateAnimation);
         image.clearAnimation();
         image.setVisibility(View.INVISIBLE);
-        text.setText(refreshingText);
+//        text.setText(refreshingText);
     }
 
     private void setState(State state){
@@ -407,11 +440,15 @@ public class PullToRefreshListView extends ListView{
                 spinner.clearAnimation();
                 spinner.setVisibility(View.INVISIBLE);
                 image.setVisibility(View.VISIBLE);
-                text.setText(pullToRefreshText);
+//                text.setText(pullToRefreshText);
 
                 if(easteregg){
                     easterEgg1.clearAnimation();
-                    easterEgg1.setVisibility(View.GONE);
+                    easterEgg1.setVisibility(View.INVISIBLE);
+                    easterEgg2.clearAnimation();
+                    easterEgg2.setVisibility(View.INVISIBLE);
+                    easterEgg3.clearAnimation();
+                    easterEgg3.setVisibility(View.INVISIBLE);
                 }
 
                 if(showLastUpdatedText && lastUpdated != -1){
@@ -424,10 +461,24 @@ public class PullToRefreshListView extends ListView{
             case RELEASE_TO_REFRESH:
                 spinner.setVisibility(View.INVISIBLE);
                 image.setVisibility(View.VISIBLE);
-                text.setText(releaseToRefreshText);
+//                text.setText(releaseToRefreshText);
 
                 if(easteregg){
                     easterEgg1.startAnimation(a);
+
+                    postDelayed(new Runnable(){
+                        @Override
+                        public void run(){
+                            easterEgg2.startAnimation(b);
+                        }
+                    }, 100);
+
+                    postDelayed(new Runnable(){
+                        @Override
+                        public void run(){
+                            easterEgg3.startAnimation(c);
+                        }
+                    }, 200);
                 }
 
                 break;
