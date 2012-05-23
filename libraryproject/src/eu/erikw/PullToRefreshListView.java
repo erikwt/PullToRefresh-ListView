@@ -590,7 +590,7 @@ public class PullToRefreshListView extends ListView{
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id){
             hasResetHeader = false;
 
-            if(onItemClickListener != null){
+            if(onItemClickListener != null && state == State.PULL_TO_REFRESH){
                 onItemClickListener.onItemClick(adapterView, view, position, id);
             }
         }
