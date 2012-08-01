@@ -25,3 +25,6 @@ gen
 *.iml
 .idea
 out
+
+build.xml
+proguard-project.txt
