@@ -83,22 +83,23 @@ public class PullToRefreshListView extends ListView{
     private String  lastUpdatedText;
     private SimpleDateFormat lastUpdatedDateFormat = new SimpleDateFormat("dd/MM HH:mm");
 
-    private float   previousY;
-    private int     headerPositionY;
-    private int     headerPadding;
-    private boolean hasResetHeader;
-    private long lastUpdated = -1;
-    private State               state;
-    private LinearLayout        headerContainer;
-    private RelativeLayout      header;
-    private RotateAnimation     flipAnimation;
-    private RotateAnimation     reverseFlipAnimation;
-    private ImageView           image;
-    private ProgressBar         spinner;
-    private TextView            text;
-    private TextView            lastUpdatedTextView;
-    private OnItemClickListener onItemClickListener;
-    private OnRefreshListener   onRefreshListener;
+    private float                   previousY;
+    private int                     headerPositionY;
+    private int                     headerPadding;
+    private boolean                 hasResetHeader;
+    private long                    lastUpdated = -1;
+    private State                   state;
+    private LinearLayout            headerContainer;
+    private RelativeLayout          header;
+    private RotateAnimation         flipAnimation;
+    private RotateAnimation         reverseFlipAnimation;
+    private ImageView               image;
+    private ProgressBar             spinner;
+    private TextView                text;
+    private TextView                lastUpdatedTextView;
+    private OnItemClickListener     onItemClickListener;
+    private OnItemLongClickListener onItemLongClickListener;
+    private OnRefreshListener       onRefreshListener;
 
 
     public PullToRefreshListView(Context context){
@@ -119,6 +120,11 @@ public class PullToRefreshListView extends ListView{
     @Override
     public void setOnItemClickListener(OnItemClickListener onItemClickListener){
         this.onItemClickListener = onItemClickListener;
+    }
+
+    @Override
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener){
+        this.onItemLongClickListener = onItemLongClickListener;
     }
 
     /**
@@ -261,6 +267,7 @@ public class PullToRefreshListView extends ListView{
         vto.addOnGlobalLayoutListener(new PTROnGlobalLayoutListener());
 
         super.setOnItemClickListener(new PTROnItemClickListener());
+        super.setOnItemLongClickListener(new PTROnItemLongClickListener());
     }
 
     private void setHeaderPadding(int padding){
@@ -339,12 +346,6 @@ public class PullToRefreshListView extends ListView{
         int yTranslate = state == State.REFRESHING ?
                 header.getHeight() - headerContainer.getHeight() :
                 -headerContainer.getHeight() - Math.round(headerPositionY);
-
-//        Log.i("GREPME", "state: " + state);
-//        Log.i("GREPME", "scrolly: " + headerPositionY);
-//        Log.i("GREPME", "measuredHeaderHeight: " + measuredHeaderHeight);
-//        Log.i("GREPME", "headerPadding: " + headerPadding);
-//        Log.i("GREPME", "ytranslate: " + yTranslate);
 
         TranslateAnimation bounceAnimation = new TranslateAnimation(
                 TranslateAnimation.ABSOLUTE, 0,
@@ -512,8 +513,24 @@ public class PullToRefreshListView extends ListView{
             hasResetHeader = false;
 
             if(onItemClickListener != null && state == State.PULL_TO_REFRESH){
-                onItemClickListener.onItemClick(adapterView, view, position, id);
+                // Passing up onItemClick. Correct position with the number of header views
+                onItemClickListener.onItemClick(adapterView, view, position - getHeaderViewsCount(), id);
             }
+        }
+    }
+
+    private class PTROnItemLongClickListener implements OnItemLongClickListener{
+
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id){
+            hasResetHeader = false;
+
+            if(onItemClickListener != null && state == State.PULL_TO_REFRESH){
+                // Passing up onItemLongClick. Correct position with the number of header views
+                return onItemLongClickListener.onItemLongClick(adapterView, view, position - getHeaderViewsCount(), id);
+            }
+
+            return false;
         }
     }
 }
