@@ -5,11 +5,15 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 import eu.erikw.PullToRefreshListView;
 import eu.erikw.PullToRefreshListView.OnRefreshListener;
 
-public class PullToRefreshListViewSampleActivity extends Activity {
+public class PullToRefreshListViewSampleActivity extends Activity implements AdapterView.OnItemClickListener{
     
 	private static ArrayList<String> items;
 	static{
@@ -37,7 +41,8 @@ public class PullToRefreshListViewSampleActivity extends Activity {
 	}
 	
 	private PullToRefreshListView listView;
-	
+    private ArrayAdapter<String> adapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +90,14 @@ public class PullToRefreshListViewSampleActivity extends Activity {
 			}
 		});
         
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, items);
+        adapter = new ArrayAdapter<String>(this, R.layout.list_item, items);
         listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l){
+        Toast.makeText(this, adapter.getItem(i), Toast.LENGTH_SHORT).show();
     }
 }
