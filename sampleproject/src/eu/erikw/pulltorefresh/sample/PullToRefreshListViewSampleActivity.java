@@ -1,17 +1,15 @@
 package eu.erikw.pulltorefresh.sample;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 import eu.erikw.PullToRefreshListView;
 import eu.erikw.PullToRefreshListView.OnRefreshListener;
+
+import java.util.ArrayList;
 
 public class PullToRefreshListViewSampleActivity extends Activity implements AdapterView.OnItemClickListener{
     
