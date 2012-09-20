@@ -2,26 +2,11 @@ package eu.erikw;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.view.*;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.animation.Animation;
+import android.view.animation.*;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.OvershootInterpolator;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,7 +30,7 @@ import java.util.Date;
  * @author Erik Wallentinsen <dev+ptr@erikw.eu>
  * @version 1.0.0
  */
-public class PullToRefreshListView extends ListView{
+public class PullToRefreshListView extends ListView {
 
     private static final float PULL_RESISTANCE                 = 1.7f;
     private static final int   BOUNCE_ANIMATION_DURATION       = 700;
@@ -137,22 +122,22 @@ public class PullToRefreshListView extends ListView{
     private String  lastUpdatedText;
     private SimpleDateFormat lastUpdatedDateFormat = new SimpleDateFormat("dd/MM HH:mm");
 
-    private float   previousY;
-    private int     headerPositionY;
-    private int     headerPadding;
-    private boolean hasResetHeader;
-    private long lastUpdated = -1;
-    private State               state;
+    private float                   previousY;
+    private int                     headerPadding;
+    private boolean                 hasResetHeader;
+    private long                    lastUpdated = -1;
+    private State                   state;
     private View headerContainer;
-    private RelativeLayout      header;
-    private RotateAnimation     flipAnimation;
-    private RotateAnimation     reverseFlipAnimation;
-    private ImageView           image;
+    private RelativeLayout header;
+    private RotateAnimation         flipAnimation;
+    private RotateAnimation         reverseFlipAnimation;
+    private ImageView image;
     private ImageView spinner;
 //    private TextView            text;
-    private TextView            lastUpdatedTextView;
-    private OnItemClickListener onItemClickListener;
-    private OnRefreshListener   onRefreshListener;
+    private TextView lastUpdatedTextView;
+    private OnItemClickListener     onItemClickListener;
+    private OnItemLongClickListener onItemLongClickListener;
+    private OnRefreshListener       onRefreshListener;
     private Animation rotateAnimation;
     private View easterEgg1, easterEgg2, easterEgg3;
 
@@ -175,6 +160,11 @@ public class PullToRefreshListView extends ListView{
     @Override
     public void setOnItemClickListener(OnItemClickListener onItemClickListener){
         this.onItemClickListener = onItemClickListener;
+    }
+
+    @Override
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener){
+        this.onItemLongClickListener = onItemLongClickListener;
     }
 
     /**
@@ -316,6 +306,7 @@ public class PullToRefreshListView extends ListView{
         vto.addOnGlobalLayoutListener(new PTROnGlobalLayoutListener());
 
         super.setOnItemClickListener(new PTROnItemClickListener());
+        super.setOnItemLongClickListener(new PTROnItemLongClickListener());
     }
 
     private void setHeaderPadding(int padding){
@@ -360,7 +351,6 @@ public class PullToRefreshListView extends ListView{
                     float y = event.getY();
                     float diff = y - previousY;
                     if(diff > 0) diff /= PULL_RESISTANCE;
-                    else if(state == State.REFRESHING) headerPositionY -= diff;
                     previousY = y;
 
                     int newHeaderPadding = Math.max(Math.round(headerPadding + diff), -header.getHeight());
@@ -393,7 +383,7 @@ public class PullToRefreshListView extends ListView{
     private void bounceBackHeader(){
         int yTranslate = state == State.REFRESHING ?
                 header.getHeight() - headerContainer.getHeight() :
-                -headerContainer.getHeight() - Math.round(headerPositionY);
+                -headerContainer.getHeight() - headerContainer.getTop();
 
         TranslateAnimation bounceAnimation = new TranslateAnimation(
                 TranslateAnimation.ABSOLUTE, 0,
@@ -535,7 +525,7 @@ public class PullToRefreshListView extends ListView{
 
         @Override
         public void onAnimationEnd(Animation animation){
-            setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -measuredHeaderHeight);
+            setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -measuredHeaderHeight - headerContainer.getTop());
             setSelection(0);
 
             android.view.ViewGroup.LayoutParams lp = getLayoutParams();
@@ -591,8 +581,24 @@ public class PullToRefreshListView extends ListView{
             hasResetHeader = false;
 
             if(onItemClickListener != null && state == State.PULL_TO_REFRESH){
-                onItemClickListener.onItemClick(adapterView, view, position, id);
+                // Passing up onItemClick. Correct position with the number of header views
+                onItemClickListener.onItemClick(adapterView, view, position - getHeaderViewsCount(), id);
             }
+        }
+    }
+
+    private class PTROnItemLongClickListener implements OnItemLongClickListener{
+
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id){
+            hasResetHeader = false;
+
+            if(onItemLongClickListener != null && state == State.PULL_TO_REFRESH){
+                // Passing up onItemLongClick. Correct position with the number of header views
+                return onItemLongClickListener.onItemLongClick(adapterView, view, position - getHeaderViewsCount(), id);
+            }
+
+            return false;
         }
     }
 }
