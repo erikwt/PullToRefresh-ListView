@@ -511,7 +511,7 @@ public class PullToRefreshListView extends ListView{
         public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id){
             hasResetHeader = false;
 
-            if(onItemClickListener != null && state == State.PULL_TO_REFRESH){
+            if(onItemLongClickListener != null && state == State.PULL_TO_REFRESH){
                 // Passing up onItemLongClick. Correct position with the number of header views
                 return onItemLongClickListener.onItemLongClick(adapterView, view, position - getHeaderViewsCount(), id);
             }
