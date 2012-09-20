@@ -2,6 +2,7 @@ package eu.erikw;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.*;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.*;
@@ -70,7 +71,6 @@ public class PullToRefreshListView extends ListView{
     private SimpleDateFormat lastUpdatedDateFormat = new SimpleDateFormat("dd/MM HH:mm");
 
     private float                   previousY;
-    private int                     headerPositionY;
     private int                     headerPadding;
     private boolean                 hasResetHeader;
     private long                    lastUpdated = -1;
@@ -298,7 +298,6 @@ public class PullToRefreshListView extends ListView{
                     float y = event.getY();
                     float diff = y - previousY;
                     if(diff > 0) diff /= PULL_RESISTANCE;
-                    else if(state == State.REFRESHING) headerPositionY -= diff;
                     previousY = y;
 
                     int newHeaderPadding = Math.max(Math.round(headerPadding + diff), -header.getHeight());
@@ -331,7 +330,7 @@ public class PullToRefreshListView extends ListView{
     private void bounceBackHeader(){
         int yTranslate = state == State.REFRESHING ?
                 header.getHeight() - headerContainer.getHeight() :
-                -headerContainer.getHeight() - Math.round(headerPositionY);
+                -headerContainer.getHeight() - headerContainer.getTop();
 
         TranslateAnimation bounceAnimation = new TranslateAnimation(
                 TranslateAnimation.ABSOLUTE, 0,
@@ -443,7 +442,7 @@ public class PullToRefreshListView extends ListView{
 
         @Override
         public void onAnimationEnd(Animation animation){
-            setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -measuredHeaderHeight);
+            setHeaderPadding(stateAtAnimationStart == State.REFRESHING ? 0 : -measuredHeaderHeight - headerContainer.getTop());
             setSelection(0);
 
             android.view.ViewGroup.LayoutParams lp = getLayoutParams();
