@@ -294,7 +294,7 @@ public class PullToRefreshListView extends ListView{
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if(previousY != -1){
+                if(previousY != -1 && getFirstVisiblePosition() == 0){
                     float y = event.getY();
                     float diff = y - previousY;
                     if(diff > 0) diff /= PULL_RESISTANCE;
