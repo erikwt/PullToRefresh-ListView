@@ -4,6 +4,7 @@ local.properties
 project.properties
 bin
 gen
+.classpath
 
 # From https://github.com/github/gitignore/raw/master/Android.gitignore
 # built application files
@@ -28,3 +29,4 @@ out
 
 build.xml
 proguard-project.txt
+ant.properties
