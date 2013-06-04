@@ -87,6 +87,8 @@ public class PullToRefreshListView extends ListView{
     private OnItemLongClickListener onItemLongClickListener;
     private OnRefreshListener       onRefreshListener;
 
+    private float mScrollStartY;
+    private final int IDLE_DISTANCE = 5;
 
     public PullToRefreshListView(Context context){
         super(context);
@@ -273,8 +275,16 @@ public class PullToRefreshListView extends ListView{
 
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                if(getFirstVisiblePosition() == 0) previousY = event.getY();
-                else previousY = -1;
+                if(getFirstVisiblePosition() == 0){
+                	previousY = event.getY();
+                }
+                else {
+                	previousY = -1;
+                }
+                
+                // Remember where have we started
+                mScrollStartY = event.getY();
+                
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -294,7 +304,7 @@ public class PullToRefreshListView extends ListView{
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if(previousY != -1){
+                if(previousY != -1 && Math.abs(mScrollStartY-event.getY()) > IDLE_DISTANCE){
                     float y = event.getY();
                     float diff = y - previousY;
                     if(diff > 0) diff /= PULL_RESISTANCE;
@@ -316,8 +326,6 @@ public class PullToRefreshListView extends ListView{
                             image.clearAnimation();
                             image.startAnimation(reverseFlipAnimation);
                         }
-
-                        return true;
                     }
                 }
 
