@@ -29,7 +29,7 @@ import java.util.Date;
  * https://github.com/erikwt/PullToRefresh-ListView
  *
  * @author Erik Wallentinsen <dev+ptr@erikw.eu>
- * @version 1.0.0
+ * @version 1.3.0
  */
 public class PullToRefreshListView extends ListView{
 
