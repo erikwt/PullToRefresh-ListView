@@ -3,5 +3,7 @@
 
     <string name="hello">Hello World, PullToRefreshListViewSampleActivity!</string>
     <string name="app_name">PullToRefresh SampleProject</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 
 </resources>
