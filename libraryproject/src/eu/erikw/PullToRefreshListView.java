@@ -77,8 +77,8 @@ public class PullToRefreshListView extends ListView{
     private State                   state;
     private LinearLayout            headerContainer;
     private RelativeLayout          header;
-    private RotateAnimation         flipAnimation;
-    private RotateAnimation         reverseFlipAnimation;
+//    private RotateAnimation         flipAnimation;
+//    private RotateAnimation         reverseFlipAnimation;
     private ImageView               image;
     private ProgressBar             spinner;
     private TextView                text;
@@ -237,15 +237,15 @@ public class PullToRefreshListView extends ListView{
         refreshingText = getContext().getString(R.string.ptr_refreshing);
         lastUpdatedText = getContext().getString(R.string.ptr_last_updated);
 
-        flipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
-        flipAnimation.setInterpolator(new LinearInterpolator());
-        flipAnimation.setDuration(ROTATE_ARROW_ANIMATION_DURATION);
-        flipAnimation.setFillAfter(true);
-
-        reverseFlipAnimation = new RotateAnimation(-180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
-        reverseFlipAnimation.setInterpolator(new LinearInterpolator());
-        reverseFlipAnimation.setDuration(ROTATE_ARROW_ANIMATION_DURATION);
-        reverseFlipAnimation.setFillAfter(true);
+//        flipAnimation = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+//        flipAnimation.setInterpolator(new LinearInterpolator());
+//        flipAnimation.setDuration(ROTATE_ARROW_ANIMATION_DURATION);
+//        flipAnimation.setFillAfter(true);
+//
+//        reverseFlipAnimation = new RotateAnimation(-180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+//        reverseFlipAnimation.setInterpolator(new LinearInterpolator());
+//        reverseFlipAnimation.setDuration(ROTATE_ARROW_ANIMATION_DURATION);
+//        reverseFlipAnimation.setFillAfter(true);
 
         addHeaderView(headerContainer);
         setState(State.PULL_TO_REFRESH);
@@ -318,13 +318,13 @@ public class PullToRefreshListView extends ListView{
                         if(state == State.PULL_TO_REFRESH && headerPadding > 0){
                             setState(State.RELEASE_TO_REFRESH);
 
-                            image.clearAnimation();
-                            image.startAnimation(flipAnimation);
+//                            image.clearAnimation();
+//                            image.startAnimation(flipAnimation);
                         }else if(state == State.RELEASE_TO_REFRESH && headerPadding < 0){
                             setState(State.PULL_TO_REFRESH);
 
-                            image.clearAnimation();
-                            image.startAnimation(reverseFlipAnimation);
+//                            image.clearAnimation();
+//                            image.startAnimation(reverseFlipAnimation);
                         }
                     }
                 }
@@ -374,6 +374,7 @@ public class PullToRefreshListView extends ListView{
         spinner.setVisibility(View.VISIBLE);
         image.clearAnimation();
         image.setVisibility(View.INVISIBLE);
+        image.setImageResource(R.drawable.ball_drag);
         text.setText(refreshingText);
     }
 
@@ -382,6 +383,7 @@ public class PullToRefreshListView extends ListView{
         switch(state){
             case PULL_TO_REFRESH:
                 spinner.setVisibility(View.INVISIBLE);
+                image.setImageResource(R.drawable.ball_drag);
                 image.setVisibility(View.VISIBLE);
                 text.setText(pullToRefreshText);
 
@@ -394,6 +396,7 @@ public class PullToRefreshListView extends ListView{
 
             case RELEASE_TO_REFRESH:
                 spinner.setVisibility(View.INVISIBLE);
+                image.setImageResource(R.drawable.ball_release);
                 image.setVisibility(View.VISIBLE);
                 text.setText(releaseToRefreshText);
                 break;
