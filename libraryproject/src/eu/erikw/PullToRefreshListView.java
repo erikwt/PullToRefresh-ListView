@@ -338,7 +338,7 @@ public class PullToRefreshListView extends ListView{
     private void bounceBackHeader(){
         int yTranslate = state == State.REFRESHING ?
                 header.getHeight() - headerContainer.getHeight() :
-                -headerContainer.getHeight() - headerContainer.getTop();
+                -headerContainer.getHeight() - headerContainer.getTop() + getPaddingTop();;
 
         TranslateAnimation bounceAnimation = new TranslateAnimation(
                 TranslateAnimation.ABSOLUTE, 0,
