@@ -144,7 +144,8 @@ public class PullToRefreshListView extends ListView{
 
     /**
      * Default is false. Show the last-updated date/time in the 'Pull ro Refresh'
-     * header. See 'setLastUpdatedDateFormat' to set the date/time formatting.
+     * header. See 'setLastUpdatedDateFormat' to set the date/time formatting,
+	 * and 'setTextLastUpdated' to change the text.
      *
      * @param showLastUpdatedText
      */
@@ -156,12 +157,24 @@ public class PullToRefreshListView extends ListView{
     /**
      * Default: "dd/MM HH:mm". Set the format in which the last-updated
      * date/time is shown. Meaningless if 'showLastUpdatedText == false (default)'.
-     * See 'setShowLastUpdatedText'.
+     * See 'setShowLastUpdatedText' and 'setTextLastUpdated'.
      *
      * @param lastUpdatedDateFormat
      */
     public void setLastUpdatedDateFormat(SimpleDateFormat lastUpdatedDateFormat){
         this.lastUpdatedDateFormat = lastUpdatedDateFormat;
+    }
+
+    /**
+     * Default: The time of the last refresh, not shown until the first refresh by default.
+     * See 'setShowLastUpdatedText' and 'setTextLastUpdated'.
+     *
+     * @param lastUpdatedDateFormat
+     */
+    public void setLastUpdated(long lastUpdated){
+        this.lastUpdated = lastUpdated;
+        lastUpdatedTextView.setVisibility(View.VISIBLE);
+        lastUpdatedTextView.setText(String.format(lastUpdatedText, lastUpdatedDateFormat.format(new Date(lastUpdated))));
     }
 
     /**
@@ -220,6 +233,15 @@ public class PullToRefreshListView extends ListView{
         if(state == State.REFRESHING){
             text.setText(refreshingText);
         }
+    }
+
+    /**
+     * Change the label of the last updated notice
+     *
+     * @param lastUpdatedText Text
+     */
+    public void setTextLastUpdated(String lastUpdatedText){
+        this.lastUpdatedText = lastUpdatedText;
     }
 
     private void init(){
@@ -386,8 +408,7 @@ public class PullToRefreshListView extends ListView{
                 text.setText(pullToRefreshText);
 
                 if(showLastUpdatedText && lastUpdated != -1){
-                    lastUpdatedTextView.setVisibility(View.VISIBLE);
-                    lastUpdatedTextView.setText(String.format(lastUpdatedText, lastUpdatedDateFormat.format(new Date(lastUpdated))));
+                    setLastUpdated(lastUpdated);
                 }
 
                 break;
