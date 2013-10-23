@@ -69,13 +69,6 @@ listView.setOnRefreshListener(new OnRefreshListener() {
         // Your code to refresh the list contents
         
         // ...
-        
-        // Make sure you call listView.onRefreshComplete()
-        // when the loading is done. This can be done from here or any
-        // other place, like on a broadcast receive from your loading
-        // service or the onPostExecute of your AsyncTask.
-        
-        listView.onRefreshComplete();
     }
 });
 
