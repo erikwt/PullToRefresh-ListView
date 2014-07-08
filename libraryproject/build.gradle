@@ -1,0 +1,63 @@
+apply plugin: 'android-library'
+
+buildscript {
+    repositories {
+        jcenter()
+
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.12.+'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+ext {
+    isLibrary = true
+    pomPackaging = "aar"
+    pomArtifactId = "PullToRefresh-ListView"
+    pomName = "Android 'Pull to Refresh' ListView library"
+    pomDescription = 'A generic, customizable, open source Android ListView implementation that has "Pull to Refresh" functionality. This ListView can be used as a replacement of the normal Android android.widget.ListView class.'
+}
+
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.1.0"
+
+    defaultConfig {
+        minSdkVersion 4
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
+    }
+
+    lintOptions {
+      abortOnError false
+    }
+
+    sourceSets {
+      main {
+        manifest.srcFile 'AndroidManifest.xml'
+          java.srcDirs = ['src']
+          res.srcDirs = ['res']
+      }
+    }
+
+    buildTypes {
+      release {
+        runProguard true
+          proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg'
+      }
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+}
+
