@@ -15,6 +15,14 @@ allprojects {
 
     ext {
         isLibrary = false
+
+        // Fill out the proper values here and uncomment.
+        // See also https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
+        // Upload it with: gradle uploadArchives
+        // sonatypeUsername = 'yourusername'
+        // sonatypePassword = 'yourpassword'
+        // sonatypeRepo = 'the-repo'
+        // sonatypeSnapshotRepo = 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
 }
 
