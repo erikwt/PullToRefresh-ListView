@@ -16,13 +16,13 @@
      -->
      
      <!-- Examples below, remove comment to see effect -->
-    <style name="ptr_headerContainer">
+    <style name="ptr_headerContainer.custom">
         
         <!-- Change the background color -->
         <!-- <item name="android:background">@android:color/darker_gray</item>  -->
     </style>
     
-    <style name="ptr_text">
+    <style name="ptr_text.custom">
         
         <!-- Change the text style and color -->
         <!-- <item name="android:textStyle">bold|italic</item>  -->

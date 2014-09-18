@@ -89,7 +89,7 @@ aspect to your needs though, like the arrow image, text size, text color and bac
 To do so, override the style attributes to your liking, like the following example:
 
 ``` xml
-<style name="ptr_text">
+<style name="ptr_text.custom">
         
     <!-- Change the text style and color -->
     <item name="android:textStyle">bold|italic</item>
@@ -99,11 +99,11 @@ To do so, override the style attributes to your liking, like the following examp
 
 The various styles you can override are;
 
-* ptr_headerContainer
-* ptr_header
-* ptr_arrow
-* ptr_spinner
-* ptr_text
+* ptr_headerContainer.custom
+* ptr_header.custom
+* ptr_arrow.custom
+* ptr_spinner.custom
+* ptr_text.custom
 
 The default attributes can be found in the [library project](https://github.com/erikwt/PullToRefresh-ListView/blob/master/libraryproject/res/values/default_style.xml)
 
