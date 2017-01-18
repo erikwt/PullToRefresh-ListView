@@ -406,6 +406,11 @@ public class PullToRefreshListView extends ListView{
                     setState(State.PULL_TO_REFRESH);
                 }else{
                     onRefreshListener.onRefresh();
+                    // Make sure call onRefreshComplete()
+                    // when the loading is done. This can be done from here or any
+                    // other place, like on a broadcast receive from your loading
+                    // service or the onPostExecute of your AsyncTask.
+                    onRefreshComplete();
                 }
 
                 break;
